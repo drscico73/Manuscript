@@ -16,7 +16,7 @@ outFileRds <- "/Path/to/file/filename.rds"
 numCores <- 12L
 numReps <- 100L 
 slimCmd <- "/usr/local/bin/slim"
-slimScript <- "/Path/to/file/toy05.slim"
+slimScript <- "/Path/to/file/H0_2Chrom.slim"
 popSize <- 1250L
 focalGen <- 10L
 
