@@ -16,7 +16,7 @@ outFileRds <- "/Path/to/file/filename.rds"
 numCores <- 12L
 numReps <- 100L 
 slimCmd <- "/usr/local/bin/slim"
-slimScript <- "/Path/to/file/toy04.slim"
+slimScript <- "/Path/to/file/H0_Check.slim"
 popSize <- 1250L
 focalGen <- 10L
 seed=sample(100000000:999999999,1)
