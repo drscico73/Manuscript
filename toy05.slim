@@ -1,0 +1,222 @@
+// set up a simulation of two lines mixed in 50:50 ratio
+initialize()
+{
+	// Read/write population info here
+	if (!exists("popFile"))
+		defineConstant("popFile", "pop.txt");
+	
+	if (!exists("useBinaryPopfile"))
+		defineConstant("useBinaryPopfile", T);
+	
+	// Reinitialize population and store it in popFile, or read a population for popFile?
+	if (!exists("initPop"))
+		defineConstant("initPop", F);
+	
+	// replicate size
+	if (!exists("popSize"))
+		defineConstant("popSize", 1250);
+	
+	// model genome size
+	if (!exists("genomeSize"))
+		defineConstant("genomeSize", 23542271); //23542271
+	
+	// distance between neutral mutations (= line 1 markers)
+	if (!exists("markerDist"))
+		defineConstant("markerDist", genomeSize/50);
+	
+	// final generation to simulate
+	if (!exists("maxGen"))
+		defineConstant("maxGen", 10);
+	
+	// generations where to write out the state
+	if (!exists("writeOutput"))
+		defineConstant("writeOutput", 10);
+	
+	// generations where to write out the state
+	if (!exists("initFreq"))
+		defineConstant("initFreq", 0.33);
+	
+	// generations where to write out the state
+	if (!exists("domCoefs"))
+		defineConstant("domCoefs", c(0.5,0.5));
+	
+	// Fitness Scaling to check for Epistasis
+	if (!exists("epis"))
+		defineConstant("epis", 1.00);
+	
+	//Recombination rate
+	if (!exists("recomb"))
+		defineConstant("recomb", 5e-8);
+	
+	// vcf file Path	
+	if (!exists("vcfPath"))
+		defineConstant("vcfPath", "sample.vcf");
+	
+	initializeSex();
+	// neutral mutations for most markers
+	initializeMutationType("m1", 0.5, "f", 0.0);
+//	defineConstant("targetPos0", c(250000, 750000));
+//	defineConstant("selCoefs", c(0.1,0.1));
+	
+	// two ways to run simulation: specify targetPos0 and corresponding selCoefs directly,
+	// or set only numTargets and selStrength, which will set targets at random positions
+	// with selection coefficients drawn from gamma distributions
+	
+	if (exists("targetPos0") & exists("selCoefs")) {
+		defineConstant("targetsGiven", T);
+		defineConstant("numTargets", length(targetPos0));
+		// a selected mutation for each target
+		if (!exists("domCoefs"))
+			defineConstant("domCoefs", rep(0.5, length(selCoefs)));
+		for (i in seqLen(numTargets)) {
+			initializeMutationType(paste0("m", i + 2), domCoefs[i], "f", selCoefs[i]);
+		}
+	} else {
+		defineConstant("targetsGiven", F);
+		if (!exists("numTargets"))
+			defineConstant("numTargets", 10);
+		defineConstant("targetPos0", sort(sample(seqLen(genomeSize), numTargets, replace=F)));
+		if (!exists("selStrength"))
+			defineConstant("selStrength", 0.02);
+		initializeMutationType("m2", 0.5, "g", selStrength, 10);
+		initializeMutationType("m3", 0.5, "g", -selStrength, 10);
+	}
+	
+	
+	// GENOME STRUCTURE
+	// TODO consider exons, introns, and nongenic regions
+	if (targetsGiven) {
+		allMutProbs = c(1.0, rep(0.0, numTargets));
+		initializeGenomicElementType("g1", seqAlong(allMutProbs)+1, allMutProbs);
+	} else {
+		initializeGenomicElementType("g1", c(m1, m2, m3), c(1.0, 0.0, 0.0));
+	}
+	
+	initializeChromosome(1, 23542271, type = "X", symbol = "X");
+	initializeGenomicElement(g1, 0, 23542270);
+	initializeMutationRate(0);
+	initializeRecombinationRate(2.589e-8);
+	
+	initializeChromosome(2, 23513712, type = "A", symbol = "2L");
+	initializeGenomicElement(g1, 0, 23513711);
+	initializeMutationRate(0.0);
+	initializeRecombinationRate(2.589e-8, sex = "F");
+	initializeRecombinationRate(0.0, sex = "M");
+
+
+}
+
+// replicates
+1 late ()
+{
+	if (initPop) {
+		// set up a single population  
+		sim.addSubpop("p1", popSize);
+		p1.setSexRatio(0.5);
+		// make sure we only get one mutation per position
+		sim.mutationTypes.mutationStackGroup = 1;
+		sim.mutationTypes.mutationStackPolicy = "l";
+		sim.mutationTypes.convertToSubstitution = F;
+		
+		markerPosX  = asInteger(seq(1, 23542271-1, by=markerDist));
+		markerTypeX = rep(m1, length(markerPosX));
+		markerPosA  = asInteger(seq(1, 23513712-1, by=markerDist));
+		markerTypeA = rep(m1, length(markerPosA));
+		
+X_genomes = NULL;
+A_genomes = NULL;
+
+inds = p1.individuals;
+for (ind in inds) {
+    hs = ind.haplosomesNonNull;
+
+    // X chromosomes (always first)
+    X_genomes = c(X_genomes, hs[0]);
+    if (ind.sex == "F")
+        X_genomes = c(X_genomes, hs[1]);
+
+    // autosomes (always last two)
+    A_genomes = c(A_genomes, hs[(length(hs)-2):(length(hs)-1)]);
+}
+
+		
+		// ---- X chromosome neutral markers ----
+		numX = length(X_genomes);
+		X_line1 = sample(X_genomes, asInteger(initFreq * numX), replace=F);
+		X_line1.addNewDrawnMutation(m1, markerPosX - 1);
+		
+		// ---- Autosome neutral markers ----
+		numA = length(A_genomes);
+		A_line1 = sample(A_genomes, asInteger(0.5 * numA), replace=F);
+		A_line1.addNewDrawnMutation(m1, markerPosA - 1);
+		
+		// add targets
+		if (targetsGiven) {
+			targetMutType = sim.mutationTypes[seqLen(numTargets) + 1];
+		} else {
+			targetMutType = sample(sim.mutationTypes[1:2], numTargets, replace=T);
+		}
+		
+		numX = length(X_genomes);
+		X_target = sample(X_genomes, asInteger(initFreq * numX), replace=F);
+		X_target.addNewDrawnMutation(targetMutType[0], targetPos0[0]);
+		
+		numA = length(A_genomes);
+		A_target = sample(A_genomes, asInteger(0.5 * numA), replace=F);
+		A_target.addNewDrawnMutation(targetMutType[1], targetPos0[1]);
+		
+		
+		if (useBinaryPopfile) {
+			sim.outputFull(filePath=popFile, binary=T);
+		} else {
+			sim.outputFull(filePath=popFile);
+		}
+		sim.simulationFinished();
+	} else {
+		sim.readFromPopulationFile(popFile);
+	}
+	// turn off substitutions
+	// sim.mutationTypes.convertToSubstitution = F;
+	sim.recalculateFitness();
+	suppressWarnings(T);
+	// schedule next state output
+	print(writeOutput);
+	community.rescheduleScriptBlock(s1, start=asInteger(writeOutput[0]), end=asInteger(writeOutput[0]));
+	defineGlobal("nextWriteIdx", 0);
+
+}
+
+//2: late(){
+//	inds=p1.individuals;
+//	if (exists("m2")) {
+//		for (ind in inds){
+//			if (ind.sex == "F") {
+//				if (sum(ind.haplosomesNonNull.countOfMutationsOfType(m2))>0 & sum(ind.haplosomesNonNull.countOfMutationsOfType(m3))>0){
+//					ind.fitnessScaling = epis;
+//				} else if (ind.sex == "M"){
+//					if (ind.genomesNonNull[0].countOfMutationsOfType(m2)>0 & ind.genomesNonNull[0].countOfMutationsOfType(m3)>0){
+//						ind.fitnessScaling = epis;
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
+
+// script block to output mutation counts and finish the simulation
+s1 99999 late()
+{
+	p1.species.outputFull();
+	//p1.outputVCFSample(500, replace = F, requestedSex="*", filePath = vcfPath);
+	//catn(pos + "\t" + ac + "\t" + dp + "\t" + generation + "\t" + "A");
+	p1.species.outputFixedMutations();
+	if (community.tick >= maxGen)
+		sim.simulationFinished();
+	// maybe schedule next log event
+	nextWriteIdx = nextWriteIdx + 1;
+	if (length(writeOutput) > nextWriteIdx)
+		community.rescheduleScriptBlock(s1,
+		start=asInteger(writeOutput[nextWriteIdx]),
+		end=asInteger(writeOutput[nextWriteIdx]));
+}
+
