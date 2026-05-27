@@ -116,17 +116,16 @@ initialize()
 		allInds.haploidGenome1.addNewDrawnMutation(targetMutType[0], asInteger(targetPos0[0]));
 		}
 
-	// Use the following commands for simulating both targets on same haplotype
-
+// use this set of commands when simulating targets on same haplotype
 //		if (initFreq == 0.33) {
 //		females.haploidGenome1.addNewDrawnMutation(targetMutType[1], asInteger(targetPos0[1]));
 //		females.haploidGenome1.addNewDrawnMutation(targetMutType[0], asInteger(targetPos0[0]));
 //		} else {
 //		allInds.haploidGenome1.addNewDrawnMutation(targetMutType[1], asInteger(targetPos0[1]));
 //		allInds.haploidGenome1.addNewDrawnMutation(targetMutType[0], asInteger(targetPos0[0]));
-//		}
+//		} 
 		
-	if (useBinaryPopfile) {
+if (useBinaryPopfile) {
 			sim.outputFull(filePath=popFile, binary=T);
 		} else {
 			sim.outputFull(filePath=popFile);
