@@ -1,3 +1,4 @@
+### Loading libraries ###
 library("data.table")
 library("foreach")
 library("doParallel")
@@ -11,15 +12,16 @@ library("purrr")
 library("boot")
 
 registerDoParallel(cores = parallel::detectCores())
-outFileRds <- "/Users/vidyadheeshkelkar/Desktop/s_h_estimation/QC/SO70_04.rds"
+outFileRds <- "/Path/to/file/filename.rds"
 numCores <- 12L
 numReps <- 100L 
 slimCmd <- "/usr/local/bin/slim"
-slimScript <- "/Users/vidyadheeshkelkar/Desktop/Warmup_Project/test/toy05.slim"
+slimScript <- "/Path/to/file/toy05.slim"
 popSize <- 1250L
 focalGen <- 10L
 
-
+### Loading functions ###
+# initialize sumulations
 initSlimSim <- function(targetPos1, selCoefs, popFile, popSize, initFreq, epis, domCoefs, seed, slimCmd, slimScript) {
   # fix small selCoefs that cannot be read by slim
   selCoefs[abs(selCoefs) < sqrt(.Machine$double.eps)] <- 0
@@ -64,7 +66,6 @@ runSlimSim <- function(targetPos1, selCoefs, popFile, seed, maxGen, writeOutput,
   system(slimCmdLine, intern = TRUE)
 }
 newGetSimFreqs2 <- function(slimCmd, slimScript) {
-  # lastAtPos <- lastTargetPos <- lastSelCoefs <- simFreqs <- NULL
   function(atPos, atGen, targetPos, selCoefs, popSize, initFreq, epis, domCoefs, seedBase = seed, numReps,
            saveSims = NULL, atGens = NULL) {
     popFile <- tempfile(pattern = "pop", fileext = ".bin")
@@ -124,16 +125,10 @@ newGetSimFreqs2 <- function(slimCmd, slimScript) {
     }
     # make 0-based positions 1-based
     simFreqDT[, pos := pos + 1L]
-    # fixed mutations have a "wrong" count (is tick where the mut became fixed ...)
-    # simFreqDT[state == "F" & chr == "X",  count := 1.5 * popSize]
-    # simFreqDT[state == "F" & chr == "2L", count := 2.0 * popSize]
-    # simFreqDT[, state := NULL]
-    # freqDT may be missing entries because of lost mutations
-    # simFreqDT <- simFreqDT[, .SD[data.table(pos = atPos), on = "pos"], keyby = .(gen, rep)]
     simFreqDT[is.na(count), count := 0L]
     simFreqDT[
       # allele frequencies
-      chrom == "X" , freq :=  (2/3) * count / popSize # 2 genomes / individual!
+      chrom == "X" , freq :=  (2/3) * count / popSize # 2 genomes in females, only one in males!
     ]
     simFreqDT[
       # allele frequencies
@@ -145,10 +140,6 @@ newGetSimFreqs2 <- function(slimCmd, slimScript) {
     if (!is.null(saveSims)) {
       saveRDS(simFreqDT, file = saveSims)
     }
-    #simFreqs <<- matrixStats::colMedians(matrix(data = simFreqDT[.(atGen), freq], nrow = numReps))
-    # numPos <- length(atPos)
-    # numGens <- length(atGen)
-    # array(data = simFreqDT[, freq], dim = c(numReps, numGens, numPos))
     return(simFreqDT)
   }
 }
@@ -167,7 +158,7 @@ run_once <- function(dist_bp, seed) {
   sortInfo <- sort(allTargetPos, index.return = TRUE)
   targetPos <- sortInfo$x
   selCoefs  <- allSelCoefs[sortInfo$ix]
-  
+  epis <- 2.00 # 1.00 for additive scenario
   domCoefs <- c(0.5, 0.5)
   
   ## OS
@@ -175,7 +166,7 @@ run_once <- function(dist_bp, seed) {
     atPos = targetPos, atGen = 2L,
     targetPos = targetPos, selCoefs = selCoefs,
     popSize = popSize, initFreq = 0.67,
-    epis = 2.01, domCoefs = domCoefs,
+    epis = epis, domCoefs = domCoefs,
     seedBase = seed, numReps = 1000L
   )
   
@@ -183,7 +174,7 @@ run_once <- function(dist_bp, seed) {
     atPos = targetPos, atGen = 11L,
     targetPos = targetPos, selCoefs = selCoefs,
     popSize = popSize, initFreq = 0.67,
-    epis = 2.01, domCoefs = domCoefs,
+    epis = epis, domCoefs = domCoefs,
     seedBase = seed, numReps = 1000L
   )
   
@@ -192,7 +183,7 @@ run_once <- function(dist_bp, seed) {
     atPos = targetPos, atGen = 2L,
     targetPos = targetPos, selCoefs = selCoefs,
     popSize = popSize, initFreq = 0.33,
-    epis = 2.01, domCoefs = domCoefs,
+    epis = epis, domCoefs = domCoefs,
     seedBase = seed, numReps = 1000L
   )
   
@@ -200,7 +191,7 @@ run_once <- function(dist_bp, seed) {
     atPos = targetPos, atGen = 11L,
     targetPos = targetPos, selCoefs = selCoefs,
     popSize = popSize, initFreq = 0.33,
-    epis = 2.01, domCoefs = domCoefs,
+    epis = epis, domCoefs = domCoefs,
     seedBase = seed, numReps = 1000L
   )
   
@@ -223,47 +214,24 @@ run_once <- function(dist_bp, seed) {
     bind_freqs(SO_1, SO_10, "SO") )
 }
 
+### MAIN Script ###
+                        
 set.seed(123)
 seed_base <- sample(1e8:9e8,length(distances_bp))
-
+                          
+# run simulations
 all_results <- map2_dfr(
   distances_bp,
   seed_base,
   run_once
 )
 
-write.table(all_results, "/Users/vidyadheeshkelkar/Desktop/Warmup_Project/H0_2chrom_add.txt", sep = "\t", row.names = FALSE, quote = FALSE)
+# save results                          
+write.table(all_results, "/Path/to/file/filename.txt", sep = "\t", row.names = FALSE, quote = FALSE)
 
-# locus1_results <- all_results %>%
-#   filter(pos == target1)
-# locus1_summary <- locus1_results %>%
-#   group_by(Cross) %>%
-#   summarise(
-#     mean_s = mean(s, na.rm = TRUE),
-#     se_s   = sd(s, na.rm = TRUE) / sqrt(n()),
-#     .groups = "drop"
-#   )
-# 
-# ggplot(locus1_summary,
-#        aes(x = distance_mb, y = mean_s, color = Cross, group = Cross)) +
-#   geom_line(size = 1.2) +
-#   geom_point(size = 3) +
-#   geom_errorbar(aes(ymin = mean_s - se_s, ymax = mean_s + se_s), width = 0.03) +
-#   labs(x = "Distance between targets (Mb)", y = "Selection response at locus 1 (s)",
-#        color = "Population") +
-#   theme_bw() +
-#   facet_wrap(~Cross, scales="free_y", nrow = 2)
-# theme(
-#   axis.title = element_text(size = 14, face = "bold"),
-#   axis.text  = element_text(size = 12),
-#   legend.title = element_text(size = 13),
-#   legend.text  = element_text(size = 12)
-# )
-
-
-a <- read.table("/Users/vidyadheeshkelkar/Desktop/Warmup_Project/H0_2chrom_add.txt", sep = "\t", header = TRUE)
-e <- read.table("/Users/vidyadheeshkelkar/Desktop/Warmup_Project/H0_2chrom_epi.txt", sep = "\t", header = TRUE)
-
+# load the result files                        
+a <- read.table("/Path/to/file/filename.txt", sep = "\t", header = TRUE)  # additive scenario
+e <- read.table("/Path/to/file/filename.txt", sep = "\t", header = TRUE)  # epistatic scenario
 
 
 p2a <- ggplot(subset(a,chrom=="X" & Target=="Target 1" & pos == 1000000),
@@ -301,22 +269,8 @@ summary_s <- all_results %>%
     .groups = "drop"
   )
 
-# ggplot(summary_s,aes(x = distance_mb, y = mean_s, color = Cross, group = paste(Cross,pos))) +
-#   geom_line(size = 1.2) +
-#   geom_point(size = 2.5) +
-#   geom_errorbar(aes(ymin = mean_s - se_s,ymax = mean_s + se_s), width = 0.03) +
-#   facet_wrap(~ Cross, scales = "free_y") +
-#     labs(x = "Distance between targets (Mb)", y = "Selection response (s)", color = "Cross") +
-#     theme_bw() +
-#     theme(
-#       strip.text = element_text(size = 14, face = "bold"),
-#       axis.title = element_text(size = 14, face = "bold"),
-#       axis.text  = element_text(size = 12),
-#       legend.title = element_text(size = 13),
-#       legend.text  = element_text(size = 12))
 
-
-p2ce <- ggplot(subset(summary_s, Target=="Target 1"), aes(x = distance_mb, y = mean_s, color = Cross, 
+p2e <- ggplot(subset(summary_s, Target=="Target 1"), aes(x = distance_mb, y = mean_s, color = Cross, 
                                                         group = interaction(Target, Cross))) +
   geom_line(size = 1) + 
   geom_point(size = 1.5) +
