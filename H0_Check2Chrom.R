@@ -21,6 +21,18 @@ popSize <- 1250L
 focalGen <- 10L
 
 ### Loading functions ###
+
+asStr <- function(x) {
+  if (is.numeric(x)) {
+    if (length(x) > 1) {
+      paste0("'c(", paste(x, collapse = ","), ")'")
+    } else {
+      as.character(x)
+    }
+  } else {
+    paste0('"\'', x, '\'"')
+  }
+}
 # initialize sumulations
 initSlimSim <- function(targetPos1, selCoefs, popFile, popSize, initFreq, epis, domCoefs, seed, slimCmd, slimScript) {
   # fix small selCoefs that cannot be read by slim
