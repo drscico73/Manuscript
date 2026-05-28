@@ -240,9 +240,9 @@ seed <- sample(1e8:9e8, length(distances_bp))
 
 # run simulations - 
 # need to be run 4 times, changing the parameters to suit each case
-# targets on same haplotype - epistatic & neutral
-# targets on different haplotypes - epistatic & neutral
-# changes need to be made in the SLiM Script
+# Case I & II - targets on same haplotype - epistatic & neutral
+# Caase III & IV - targets on different haplotypes - epistatic & neutral
+# changes need to be made in the SLiM Script (Explained in README)
 
 all_results <- map2_dfr(
   distances_bp,
@@ -269,7 +269,7 @@ summary_s <- all_results %>%
     .groups = "drop"
     )
                           
-# plotting the results
+# plotting the results - one plot for each simulation scenario
 ggplot(subset(summary_s, Target=="Target 1"), aes(x = distance_mb, y = mean_s, color = Cross, 
                       group = interaction(Target, Cross))) +
   geom_line(size = 1) + 
