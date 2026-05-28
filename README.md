@@ -54,3 +54,153 @@ Shows estimated selection strength (`s`) across chromosomes with mean ± SD ribb
 Visualizes genome-wide statistical significance, with significant loci highlighted.
 
 
+# SLiM Simulation Pipeline for Selection Response Analysis
+
+## Overview
+
+This script performs forward-time population genetic simulations using SLiM to investigate how linkage distance, haplotype structure, and epistasis influence allele frequency change and selection response over time.
+
+The workflow:
+
+* Initializes SLiM simulations with user-defined selection parameters
+* Simulates allele frequency trajectories across generations
+* Calculates selection response (`s`) between generations
+* Compares different population crosses and target configurations
+* Summarizes and visualizes simulation outcomes across genomic distances
+
+The repository also includes the required SLiM simulation script (`H0_Check.slim`), which controls the evolutionary model and haplotype setup.
+
+---
+
+## Requirements
+
+### R Packages
+
+```r
+data.table
+foreach
+doParallel
+poolSeq
+tidyr
+dplyr
+ggplot2
+ggpubr
+scales
+purrr
+boot
+```
+
+### External Software
+
+* SLiM (v4 or compatible)
+* GNU utilities (`sed`, `cut`) for post-processing simulation output
+
+Example SLiM executable path:
+
+```r
+slimCmd <- "/usr/local/bin/slim"
+```
+
+---
+
+## Simulation Design
+
+The simulations evaluate the effect of:
+
+* Distance between selected loci
+* Epistatic vs. neutral interactions
+* Shared vs. separate haplotypes
+* Initial allele frequency differences between populations
+
+### Key Parameters
+
+| Parameter      | Description                       |
+| -------------- | --------------------------------- |
+| `popSize`      | Population size                   |
+| `numReps`      | Number of replicate simulations   |
+| `target1`      | Reference selected locus          |
+| `distances_mb` | Distance between selected targets |
+| `selCoefs`     | Selection coefficients            |
+| `epis`         | Epistasis coefficient             |
+| `domCoefs`     | Dominance coefficients            |
+
+---
+
+## Simulation Scenarios
+
+The script is designed to be run under four evolutionary scenarios:
+
+1. Targets on the same haplotype — epistatic
+2. Targets on the same haplotype — neutral
+3. Targets on different haplotypes — epistatic
+4. Targets on different haplotypes — neutral
+
+These configurations are controlled within the included SLiM script:
+
+```bash
+H0_Check.slim
+```
+
+Required modifications for each scenario are documented directly in the SLiM script and/or repository notes.
+
+---
+
+## Workflow Summary
+
+### 1. Initialize Simulations
+
+`initSlimSim()` creates an initial population state and writes a temporary binary population file.
+
+### 2. Run Replicate Simulations
+
+`runSlimSim()` executes forward simulations to specified generations using SLiM.
+
+### 3. Extract Allele Frequencies
+
+`getSimFreqs2()` parses simulation output and calculates allele frequencies across replicates.
+
+### 4. Calculate Selection Response
+
+Selection response is estimated as:
+
+```r
+s = (logit(freq_10) - logit(freq_1)) / 10
+```
+
+### 5. Summarize Across Distances
+
+Mean selection response and standard errors are calculated for each:
+
+* Target locus
+* Population cross
+* Genomic distance
+
+---
+
+## Output
+
+### Simulation Results
+
+Results are exported as tab-delimited text files:
+
+```r
+write.table(all_results, "filename.txt")
+```
+
+### Plots
+
+The script generates:
+
+* Selection response vs. genomic distance
+* Error-bar summaries across replicates
+* Multi-panel combined figures for all simulation scenarios
+
+---
+
+## Notes
+
+* Simulations are parallelized using `foreach` and `doParallel`.
+* Temporary binary population files are automatically cleaned after execution.
+* Distances are evaluated from near-complete linkage to 20 Mb separation.
+* The script assumes diploid genomes and converts mutation counts to frequencies accordingly.
+
