@@ -233,145 +233,36 @@ write.table(all_results, "/Path/to/file/filename.txt", sep = "\t", row.names = F
 a <- read.table("/Path/to/file/filename.txt", sep = "\t", header = TRUE)  # additive scenario
 e <- read.table("/Path/to/file/filename.txt", sep = "\t", header = TRUE)  # epistatic scenario
 
+# plotting the results
+# additive scenario                          
+p2a <- ggplot(subset(a,chrom=="X" & pos == 1000000),
+              aes(factor(Cross), s , group = Cross, fill = Cross)) + 
+       geom_boxplot() +
+       labs(x = "Distance between targets (Mb)", y = "Selection response (s)", color = "Cross", linetype = "Target") + 
+       scale_fill_manual(values = c("darkgreen", "orange1")) +
+       theme_bw() +
+       theme(
+         axis.title = element_text(size = 14, face = "bold"),
+         axis.text  = element_text(size = 12),
+         legend.title = element_text(size = 13),
+         legend.text  = element_text(size = 12),
+         legend.position = "bottom") +
+      stat_compare_means(method = "t.test", label = "p.signif" , label.x = 1.4, label.y = 0.08, size = 6)
 
-p2a <- ggplot(subset(a,chrom=="X" & Target=="Target 1" & pos == 1000000),
-              aes(factor(Cross), s , group = Cross, fill = Cross)) +
-geom_boxplot() +
-labs(x = "Distance between targets (Mb)", y = "Selection response (s)", color = "Cross", linetype = "Target") +
-  scale_fill_manual(values = c("darkgreen", "orange1")) +
-  # scale_fill_manual(values = c("darkgreen", "orange1")) +
-  theme_bw() +
-  theme(
-    axis.title = element_text(size = 14, face = "bold"),
-    axis.text  = element_text(size = 12),
-    legend.title = element_text(size = 13),
-    legend.text  = element_text(size = 12),
-    legend.position = "bottom"
-  ) +
-  stat_compare_means(method = "t.test", label = "p.signif" , label.x = 1.4, label.y = 0.075, size = 6)
-
-#######################
-
-all_results <- all_results %>%
-  mutate(
-    Target = factor(
-      if_else(pos == target1, 1L, 2L),
-      levels = c(1, 2),
-      labels = c("Target 1", "Target 2")
-    )
-  )
-
-summary_s <- all_results %>%
-  group_by(distance_mb, Target, Cross) %>%
-  summarise(
-    mean_s = mean(s, na.rm = TRUE),
-    se_s   = sd(s, na.rm = TRUE) / sqrt(n()),
-    .groups = "drop"
-  )
+# epistatic scenario
+p2e <- ggplot(subset(a,chrom=="X" & pos == 1000000),
+              aes(factor(Cross), s , group = Cross, fill = Cross)) + 
+       geom_boxplot() +
+       labs(x = "Distance between targets (Mb)", y = "Selection response (s)", color = "Cross", linetype = "Target") + 
+       scale_fill_manual(values = c("darkgreen", "orange1")) +
+       theme_bw() +
+       theme(
+         axis.title = element_text(size = 14, face = "bold"),
+         axis.text  = element_text(size = 12),
+         legend.title = element_text(size = 13),
+         legend.text  = element_text(size = 12),
+         legend.position = "bottom") +
+      stat_compare_means(method = "t.test", label = "p.signif" , label.x = 1.4, label.y = 0.20, size = 6)
 
 
-p2e <- ggplot(subset(summary_s, Target=="Target 1"), aes(x = distance_mb, y = mean_s, color = Cross, 
-                                                        group = interaction(Target, Cross))) +
-  geom_line(size = 1) + 
-  geom_point(size = 1.5) +
-  geom_errorbar(aes(ymin = mean_s - se_s, ymax = mean_s + se_s), width = 0.03) + 
-  labs(x = "Distance between targets (Mb)", y = "Selection response (s)", color = "Cross", linetype = "Target") +
-  scale_color_manual(values = c("darkgreen", "orange1")) +
-  # scale_fill_manual(values = c("darkgreen", "orange1")) +
-  theme_bw() +
-  theme(
-    axis.title = element_text(size = 14, face = "bold"),
-    axis.text  = element_text(size = 12),
-    legend.title = element_text(size = 13),
-    legend.text  = element_text(size = 12)
-  )
-
-
-((p2a) | (p2e)) +
-  plot_layout(heights = c(2, 2), guides = "collect") &
-  labs(x = "Cross") &
-  plot_annotation(tag_levels = list(c("B", "C", "E", "F"))) &
-  theme_bw() &
-  theme(
-    plot.tag = element_text(face = "bold", size = 18),
-    axis.text.x = element_text(vjust = 0.5, size = 12),
-    axis.text.y = element_text(size = 12),
-    axis.title.x = element_text(size = 12, face = "bold"),
-    axis.title.y = element_text(size = 12, face = "bold"),
-    plot.title = element_text(size = 16, face = "bold"),
-    legend.title = element_text(size = 12, face = "bold"),
-    legend.text = element_text(size = 12),
-    legend.key.size = unit(1, "cm"),
-    legend.position = "bottom",
-    strip.text.x = element_text(size = 12)
-  ) 
-
-
-ggboxplot(all_results, x="Target", y="s", color="Cross") +
-  labs(x = "Position", y = "Selection Strength", color = "Population") +
-  scale_x_discrete(labels = c("Target1", "Target2")) +
-  stat_compare_means(aes(pos,s,group=Cross,label = after_stat(p.signif)), method = "t.test") +
-  theme_bw()+
-  theme(
-    axis.text.x = element_text(vjust = 0.5, size = 12),
-    axis.text.y = element_text(size = 12),
-    axis.title.x = element_text(size = 14, face = "bold"),
-    axis.title.y = element_text(size = 14, face = "bold"),
-    plot.title = element_text(size = 18, face = "bold"),
-    legend.title = element_text(size = 14, face = "bold"),
-    legend.text = element_text(size = 12),
-    legend.key.size = unit(1, "cm"),
-    legend.position = "bottom",
-    strip.text.x = element_text(size = 12)
-  )
-
-box_data <- all_results %>%
-  mutate(
-    Target = factor(
-      if_else(pos == target1, 1L, 2L),
-      labels = c("Target 1", "Target 2")
-    )
-  )
-
-ggplot(box_data, aes(x = Target, y = s, color = Cross)) +
-  geom_boxplot(outlier.shape = NA, position = position_dodge(width = 0.8)) +
-  stat_compare_means(aes(Target,s,group=Cross,label = after_stat(p.signif)), method = "t.test") +
-  labs(x = "Target", y = "Selection response (s)",color = "Cross") +
-  theme_bw() +
-  theme(
-    axis.title = element_text(size = 14, face = "bold"),
-    axis.text  = element_text(size = 12),
-    legend.title = element_text(size = 13),
-    legend.text  = element_text(size = 12)
-  )
-
-ggplot(box_data,aes(x = Target, y = s, fill = Cross)) +
-  geom_boxplot(outlier.shape = NA) +
-  stat_compare_means(aes(Target,s,group=Cross,label = after_stat(p.signif)), method = "t.test") +
-  facet_wrap(~ distance_mb, nrow = 2) +
-  labs(x = "Target", y = "Selection response (s)") +
-  theme_bw()
-
-selected_distances <- all_results %>%
-  distinct(distance_mb) %>%
-  arrange(distance_mb) %>%
-  slice(round(seq(1, n(), length.out = 10))) %>%
-  pull(distance_mb)
-box_data_10 <- all_results %>%
-  filter(distance_mb %in% selected_distances) %>%
-  mutate(
-    Target = factor(
-      if_else(pos == target1, 1L, 2L),
-      labels = c("Target 1", "Target 2"))
-  )
-
-ggplot(box_data_10,aes(x = Target, y = s, color = Cross)) +
-  geom_boxplot(outlier.shape = NA, position = position_dodge(0.8)) +
-  stat_compare_means(aes(Target,s,group=Cross,label = after_stat(p.signif)), method = "t.test") +
-  facet_wrap(~ distance_mb, nrow = 2) +
-  labs(
-    x = "Target",
-    y = "Selection response (s)",
-    color = "Cross"
-  ) +
-  theme_bw()
+  
