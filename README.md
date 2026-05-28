@@ -204,3 +204,157 @@ The script generates:
 * Distances are evaluated from near-complete linkage to 20 Mb separation.
 * The script assumes diploid genomes and converts mutation counts to frequencies accordingly.
 
+
+
+# Two-Chromosome SLiM Simulation Pipeline
+
+## Overview
+
+This script performs forward-time population genetic simulations using SLiM to investigate selection response under a two-chromosome model.
+
+Unlike the single-chromosome simulations, this framework simulates selected loci located on separate chromosomes, allowing analysis of:
+
+* Interchromosomal interactions
+* Epistatic vs. additive fitness effects
+* Cross-specific selection responses
+* Allele frequency dynamics under differing starting frequencies
+
+The required SLiM script (`H0_2Chrom.slim`) is included in the repository and defines the evolutionary model used during simulations.
+
+---
+
+## Requirements
+
+### R Packages
+
+```r
+data.table
+foreach
+doParallel
+poolSeq
+tidyr
+dplyr
+ggplot2
+ggpubr
+scales
+purrr
+boot
+```
+
+### External Software
+
+* SLiM (v4 or compatible)
+* GNU command-line utilities (`sed`, `cut`) for simulation output parsing
+
+Example SLiM executable path:
+
+```r
+slimCmd <- "/usr/local/bin/slim"
+```
+
+---
+
+## Simulation Design
+
+The simulations model two selected targets positioned on separate chromosomes.
+
+### Key Parameters
+
+| Parameter            | Description                     |
+| -------------------- | ------------------------------- |
+| `popSize`            | Population size                 |
+| `numReps`            | Number of replicate simulations |
+| `target1`, `target2` | Selected target loci            |
+| `selCoefs`           | Selection coefficients          |
+| `epis`               | Epistasis coefficient           |
+| `domCoefs`           | Dominance coefficients          |
+
+---
+
+## Simulation Scenarios
+
+The script can be used to compare:
+
+* Additive fitness effects (`epis = 1.00`)
+* Epistatic fitness effects (`epis > 1.00`)
+
+Example:
+
+```r
+epis <- 2.00   # epistatic
+epis <- 1.00   # additive
+```
+
+Simulation settings are controlled within:
+
+```bash
+H0_2Chrom.slim
+```
+
+---
+
+## Workflow Summary
+
+### 1. Initialize SLiM Populations
+
+`initSlimSim()` creates an initial population state using selected loci and starting allele frequencies.
+
+### 2. Run Parallel Simulations
+
+`runSlimSim()` executes replicate simulations across generations using SLiM.
+
+### 3. Extract Allele Frequencies
+
+`getSimFreqs2()` parses mutation counts and converts them to allele frequencies.
+
+Different frequency calculations are applied for:
+
+* X chromosome loci
+* Autosomal loci
+
+to account for chromosome-specific ploidy.
+
+### 4. Calculate Selection Response
+
+Selection response is estimated as:
+
+```r
+s = (logit(freq_10) - logit(freq_1)) / 10
+```
+
+where allele frequencies are compared between generations F1 and F10.
+
+---
+
+## Output
+
+### Simulation Results
+
+Simulation outputs are saved as tab-delimited files:
+
+```r
+write.table(all_results, "filename.txt")
+```
+
+### Plots
+
+The script generates:
+
+* Boxplots of selection response (`s`)
+* Statistical comparisons between populations
+* Additive vs. epistatic scenario comparisons
+
+Significance testing is performed using t-tests via:
+
+```r
+stat_compare_means(method = "t.test")
+```
+
+---
+
+## Notes
+
+* Simulations are parallelized using `foreach` and `doParallel`.
+* Temporary SLiM population files are automatically removed after execution.
+* The same simulation framework can be adapted for alternative chromosome architectures or fitness models.
+* Parameters controlling additive versus epistatic interactions are defined both in the R script and the accompanying SLiM script.
