@@ -1,28 +1,20 @@
 // set up a simulation of two lines mixed in 50:50 ratio
 initialize()
 {
-	// Read/write population info here
+	// read/write population info here
 	if (!exists("popFile"))
 		defineConstant("popFile", "pop.txt");
 	
 	if (!exists("useBinaryPopfile"))
 		defineConstant("useBinaryPopfile", T);
 	
-	// Reinitialize population and store it in popFile, or read a population for popFile?
+	// reinitialize population and store it in popFile
 	if (!exists("initPop"))
 		defineConstant("initPop", F);
 	
 	// replicate size
 	if (!exists("popSize"))
 		defineConstant("popSize", 1250);
-	
-	// model genome size
-	if (!exists("genomeSize"))
-		defineConstant("genomeSize", 23542271); //23542271
-	
-	// distance between neutral mutations (= line 1 markers)
-	if (!exists("markerDist"))
-		defineConstant("markerDist", genomeSize/50);
 	
 	// final generation to simulate
 	if (!exists("maxGen"))
@@ -31,32 +23,27 @@ initialize()
 	// generations where to write out the state
 	if (!exists("writeOutput"))
 		defineConstant("writeOutput", 10);
+
+	// distance between the markers in bp
+	if (!exists("markerDist"))
+		defineConstant("markerDist", 10000);
 	
-	// generations where to write out the state
+	// initial frequency of the alleles depending upon population
 	if (!exists("initFreq"))
 		defineConstant("initFreq", 0.33);
 	
-	// generations where to write out the state
+	// dominance coefficients
 	if (!exists("domCoefs"))
 		defineConstant("domCoefs", c(0.5,0.5));
 	
-	// Fitness Scaling to check for Epistasis
+	// fitness Scaling to check for Epistasis
 	if (!exists("epis"))
 		defineConstant("epis", 1.00);
 	
-	//Recombination rate
-	if (!exists("recomb"))
-		defineConstant("recomb", 5e-8);
-	
-	// vcf file Path	
-	if (!exists("vcfPath"))
-		defineConstant("vcfPath", "sample.vcf");
-	
 	initializeSex();
+
 	// neutral mutations for most markers
 	initializeMutationType("m1", 0.5, "f", 0.0);
-//	defineConstant("targetPos0", c(250000, 750000));
-//	defineConstant("selCoefs", c(0.1,0.1));
 	
 	// two ways to run simulation: specify targetPos0 and corresponding selCoefs directly,
 	// or set only numTargets and selStrength, which will set targets at random positions
@@ -84,14 +71,15 @@ initialize()
 	
 	
 	// GENOME STRUCTURE
-	// TODO consider exons, introns, and nongenic regions
 	if (targetsGiven) {
 		allMutProbs = c(1.0, rep(0.0, numTargets));
 		initializeGenomicElementType("g1", seqAlong(allMutProbs)+1, allMutProbs);
 	} else {
 		initializeGenomicElementType("g1", c(m1, m2, m3), c(1.0, 0.0, 0.0));
 	}
-	
+
+	// Setup the two Chromosomes
+
 	initializeChromosome(1, 23542271, type = "X", symbol = "X");
 	initializeGenomicElement(g1, 0, 23542270);
 	initializeMutationRate(0);
@@ -103,16 +91,15 @@ initialize()
 	initializeRecombinationRate(2.589e-8, sex = "F");
 	initializeRecombinationRate(0.0, sex = "M");
 
-
 }
 
-// replicates
 1 late ()
 {
 	if (initPop) {
 		// set up a single population  
 		sim.addSubpop("p1", popSize);
 		p1.setSexRatio(0.5);
+
 		// make sure we only get one mutation per position
 		sim.mutationTypes.mutationStackGroup = 1;
 		sim.mutationTypes.mutationStackPolicy = "l";
@@ -120,12 +107,14 @@ initialize()
 		
 		markerPosX  = asInteger(seq(1, 23542271-1, by=markerDist));
 		markerTypeX = rep(m1, length(markerPosX));
+
 		markerPosA  = asInteger(seq(1, 23513712-1, by=markerDist));
 		markerTypeA = rep(m1, length(markerPosA));
 		
 X_genomes = NULL;
 A_genomes = NULL;
 
+// Creating separate X and autosomes vectors for easy assignment of markers   
 inds = p1.individuals;
 for (ind in inds) {
     hs = ind.haplosomesNonNull;
@@ -175,8 +164,7 @@ for (ind in inds) {
 	} else {
 		sim.readFromPopulationFile(popFile);
 	}
-	// turn off substitutions
-	// sim.mutationTypes.convertToSubstitution = F;
+
 	sim.recalculateFitness();
 	suppressWarnings(T);
 	// schedule next state output
@@ -186,22 +174,25 @@ for (ind in inds) {
 
 }
 
-//2: late(){
-//	inds=p1.individuals;
-//	if (exists("m2")) {
-//		for (ind in inds){
-//			if (ind.sex == "F") {
-//				if (sum(ind.haplosomesNonNull.countOfMutationsOfType(m2))>0 & sum(ind.haplosomesNonNull.countOfMutationsOfType(m3))>0){
-//					ind.fitnessScaling = epis;
-//				} else if (ind.sex == "M"){
-//					if (ind.genomesNonNull[0].countOfMutationsOfType(m2)>0 & ind.genomesNonNull[0].countOfMutationsOfType(m3)>0){
-//						ind.fitnessScaling = epis;
-//					}
-//				}
-//			}
-//		}
-//	}
-//}
+// fitness scaling to simulate epistasis 
+// (Comment out this chunk when simulating additive scenario)
+
+2: late(){
+	inds=p1.individuals;
+	if (exists("m2")) {
+		for (ind in inds){
+			if (ind.sex == "F") {
+				if (sum(ind.haplosomesNonNull.countOfMutationsOfType(m2))>0 & sum(ind.haplosomesNonNull.countOfMutationsOfType(m3))>0){
+					ind.fitnessScaling = epis;
+				} else if (ind.sex == "M"){
+					if (ind.genomesNonNull[0].countOfMutationsOfType(m2)>0 & ind.genomesNonNull[0].countOfMutationsOfType(m3)>0){
+						ind.fitnessScaling = epis;
+					}
+				}
+			}
+		}
+	}
+}
 
 // script block to output mutation counts and finish the simulation
 s1 99999 late()
