@@ -55,13 +55,10 @@ Visualizes genome-wide statistical significance, with significant loci highlight
 
 
 # SLiM Simulation Pipeline for Selection Response Analysis
-
 ## Overview
-
-This script performs forward-time population genetic simulations using SLiM to investigate how linkage distance, haplotype structure, and epistasis influence allele frequency change and selection response over time.
+_H0_Check.R_ performs forward-time population genetic simulations using SLiM to investigate how linkage distance, haplotype structure, and epistasis influence allele frequency change and selection response over time.
 
 The workflow:
-
 * Initializes SLiM simulations with user-defined selection parameters
 * Simulates allele frequency trajectories across generations
 * Calculates selection response (`s`) between generations
@@ -70,46 +67,16 @@ The workflow:
 
 The repository also includes the required SLiM simulation script (`H0_Check.slim`), which controls the evolutionary model and haplotype setup.
 
----
-
-## Requirements
-
-### R Packages
-
-```r
-data.table
-foreach
-doParallel
-poolSeq
-tidyr
-dplyr
-ggplot2
-ggpubr
-scales
-purrr
-boot
-```
-
 ### External Software
 
-* SLiM (v4 or compatible)
+* SLiM (v5.01 or compatible)
 * GNU utilities (`sed`, `cut`) for post-processing simulation output
 
-Example SLiM executable path:
-
-```r
-slimCmd <- "/usr/local/bin/slim"
-```
-
----
-
 ## Simulation Design
-
 The simulations evaluate the effect of:
-
 * Distance between selected loci
 * Epistatic vs. neutral interactions
-* Shared vs. separate haplotypes
+* Same vs. separate haplotypes
 * Initial allele frequency differences between populations
 
 ### Key Parameters
@@ -122,27 +89,25 @@ The simulations evaluate the effect of:
 | `distances_mb` | Distance between selected targets |
 | `selCoefs`     | Selection coefficients            |
 | `epis`         | Epistasis coefficient             |
-| `domCoefs`     | Dominance coefficients            |
+| `domCoefs`     | Dominance coefficient             |
 
 ---
 
-## Simulation Scenarios
+## Simulation Scenarios & Required modifications
 
 The script is designed to be run under four evolutionary scenarios:
 
 1. Targets on the same haplotype — epistatic
+   set `epis = 2.00`
+   
 2. Targets on the same haplotype — neutral
 3. Targets on different haplotypes — epistatic
 4. Targets on different haplotypes — neutral
 
 These configurations are controlled within the included SLiM script:
-
 ```bash
 H0_Check.slim
 ```
-
-Required modifications for each scenario are documented directly in the SLiM script and/or repository notes.
-
 ---
 
 ## Workflow Summary
@@ -358,3 +323,182 @@ stat_compare_means(method = "t.test")
 * Temporary SLiM population files are automatically removed after execution.
 * The same simulation framework can be adapted for alternative chromosome architectures or fitness models.
 * Parameters controlling additive versus epistatic interactions are defined both in the R script and the accompanying SLiM script.
+
+
+
+# threshold_for_ttest.R
+
+## Overview
+
+This script uses forward-time SLiM simulations to estimate empirical significance thresholds for genome-wide t-tests comparing selection responses between experimental populations.
+
+The workflow:
+
+* Simulates allele frequency trajectories under a null evolutionary model
+* Calculates selection response (`s`) between generations
+* Performs genome-wide t-tests between populations
+* Generates empirical distributions of p-values
+* Estimates significance cutoffs for downstream statistical analyses
+
+The repository also includes:
+
+* The supporting SLiM script (`Threshold.slim`)
+* Marker `.txt` files required for simulations and chromosome setup
+
+---
+
+## Requirements
+
+### R Packages
+
+```r id="o1oqs4"
+data.table
+foreach
+doParallel
+poolSeq
+tidyr
+dplyr
+ggplot2
+ggpubr
+scales
+purrr
+boot
+```
+
+### External Software
+
+* SLiM (v4 or compatible)
+* GNU command-line tools (`sed`, `cut`) for parsing simulation output
+
+Example executable path:
+
+```r id="h6r1fz"
+slimCmd <- "/usr/local/bin/slim"
+```
+
+---
+
+## Simulation Design
+
+The simulations generate null distributions of allele frequency change across multiple chromosomes to evaluate the expected false-positive distribution of t-tests.
+
+### Population Setup
+
+Two experimental populations are simulated:
+
+* `OS`
+* `SO`
+
+Each population uses:
+
+* Different effective population sizes
+* Different initial allele frequencies
+
+Example:
+
+```r id="qzpryf"
+OS: popSize = 243, initFreq = 0.67
+SO: popSize = 356, initFreq = 0.33
+```
+
+---
+
+## Workflow Summary
+
+### 1. Initialize Simulations
+
+`initSlimSim()` creates initial SLiM populations and temporary binary population files.
+
+### 2. Run Parallel Simulations
+
+`runSlimSim()` executes replicate simulations for specified generations.
+
+### 3. Extract Allele Frequencies
+
+`getSimFreqs2()` parses mutation counts and converts them to allele frequencies.
+
+Chromosome-specific frequency calculations are applied for:
+
+* X chromosome loci
+* Autosomal loci
+
+to account for differences in ploidy.
+
+### 4. Calculate Selection Response
+
+Selection response is estimated as:
+
+```r id="v0crj5"
+s = (logit(freq_10) - logit(freq_1)) / 10
+```
+
+using allele frequencies from generations F1 and F10.
+
+### 5. Perform Genome-wide t-tests
+
+For each genomic position, a t-test compares selection responses between populations:
+
+```r id="z93z8r"
+t.test(s ~ Cross)
+```
+
+False discovery rate correction is applied using the Benjamini–Hochberg method.
+
+---
+
+## Output
+
+### Simulation Results
+
+The script generates:
+
+* Genome-wide p-values
+* Adjusted p-values (`BH` correction)
+* Empirical significance thresholds
+
+### Plots
+
+#### Genome-wide p-value Distribution
+
+Scatterplots of:
+
+```r id="0ec9ei"
+-log10(p_value)
+```
+
+across chromosomes.
+
+#### Empirical p-value Histogram
+
+Histogram of simulated p-values with estimated significance cutoff.
+
+---
+
+## Significance Threshold Estimation
+
+The empirical significance threshold is calculated as the 5th percentile of simulated p-values:
+
+```r id="ibw0d5"
+quantile(all_results_df$p_value, 0.05)
+```
+
+Chromosome-specific thresholds are also estimated separately.
+
+---
+
+## Supporting Files
+
+The repository includes:
+
+* `Threshold.slim` — SLiM simulation model
+* Marker `.txt` files used for chromosome and marker configuration
+* Seed files for reproducible simulations (`threshold_seeds.txt`)
+
+---
+
+## Notes
+
+* Simulations are parallelized using `foreach` and `doParallel`.
+* Temporary SLiM population files are automatically removed after execution.
+* The script is designed to estimate empirical null distributions for downstream genome-wide selection analyses.
+* Using the provided seed file is recommended for reproducible threshold estimates.
