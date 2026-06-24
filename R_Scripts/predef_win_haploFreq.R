@@ -240,19 +240,20 @@ keep <- !matrixStats::rowAnys(is.na(aux))
 message("Keeping ", sum(keep), " of ", nrow(aux), " sites, i.e., ~", round(100*sum(keep)/nrow(aux),2), "%")
 aux <- aux[keep]
 
+#Loading window information
 pre_win<- readRDS(file=argPre)
 
 window<- unique(pre_win$new_win)
 window<- as.data.frame(window)
 
+#Extracting the positions of the start and end of the window
 window<- window%>%separate_wider_delim(window, ":", names=c("chr", "pos"))
 window<- window%>%separate_wider_delim(pos, "-", names=c("start", "end"))
 
 window$start<- as.numeric(window$start)
 window$end<- as.numeric(window$end)
 
-
-
+#Dividing the aux into windows 
 aux$POS<- as.numeric(aux$POS)
 aux_new <- aux |> 
   fuzzy_inner_join(
@@ -260,12 +261,11 @@ aux_new <- aux |>
     by = c("CHROM"="chr","POS" = "start", "POS" = "end"),
     match_fun = list(`==`,`>=`, `<=`))
 
-
 aux_new$win<- paste(aux_new$start, aux_new$end, sep="-")
 
 # convert to data.table
 aux_new <-  as.data.table(aux_new, key = c("CHROM"))
 
-#aux_copy<- aux_new[,c(1,2,234,235)]
+#Estimating Frequencies
 dt.freq <- aux_new[, estimate.frequency(chr, win, .SD, lines, samples), by = .(chr = CHROM, win)]
 saveRDS(dt.freq, file = argRds)
