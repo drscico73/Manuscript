@@ -1,3 +1,4 @@
+### Loading libraries ###
 library("data.table")
 library("foreach")
 library("doParallel")
@@ -13,6 +14,7 @@ library("forcats")
 library("emmeans")
 library("pROC")
 
+### Initialization of parameters
 registerDoParallel(cores = parallel::detectCores())
 outFileRds <- "path_to_output_directory/out_slim.rds"
 numCores <- 12L
@@ -43,6 +45,7 @@ selCoefs<- c(selCoefs_1, selCoefs_2)
 epis = 2.00
 domCoefs <- c(0.5, 0.5)
 
+### Run the simulation for 400 different positions of marker 2 ###
 
 for(i in 1:400){
   
@@ -74,6 +77,7 @@ for(i in 1:400){
   print(i)
 }
 
+### Combine and filter the results ###
 all_runs_af_add<- bind_rows(af_df_add)
 all_runs_af_add$arch<- paste("add")
 all_runs_sel_add<- bind_rows(sel_df_add)
@@ -82,9 +86,9 @@ all_runs_af_int<- bind_rows(af_df_int)
 all_runs_af_int$arch<- paste("non-add")
 all_runs_sel_int<- bind_rows(sel_df_int)
 all_runs_sel_int$arch<- paste("non-add")
-
 all_runs_af<- rbind(all_runs_af_add, all_runs_af_int)
 all_runs_sel<- rbind(all_runs_sel_add, all_runs_sel_int)
+
 
 df_target_1_add<- target_info%>%dplyr::select(run, pos1, coef1)%>%dplyr::rename("pos"=pos1, "s"=coef1)%>%
   mutate("arch"="add")
@@ -98,37 +102,24 @@ sel_sample1<- all_runs_sel%>%filter(group=="p1")
 sel_sample2<- all_runs_sel%>%filter(group=="p2")
 sel_sample3<- all_runs_sel%>%filter(group=="p3")
 
-test1_lhs<- sel_sample2%>%dplyr::filter(line=="1")
-test1_rhs<- sel_sample3%>%dplyr::filter(line=="2")
+### Hypothesis testing: s_1(AB)=s_1(AC)-s_1(BC) ###
+test1_lhs<- sel_sample2%>%dplyr::filter(line=="A")
+test1_rhs<- sel_sample3%>%dplyr::filter(line=="B")
 data_pred_1<- rbind(test1_lhs, test1_rhs)
 data_pred_1<- data_pred_1%>%dplyr::filter(pos %in% unique(df_target_1$pos))
-data_obs_1<- sel_sample1%>%dplyr::filter(line=="1")
+data_obs_1<- sel_sample1%>%dplyr::filter(line=="A")
 data_obs_1<- data_obs_1%>%dplyr::filter(pos %in% unique(df_target_1$pos))
 result_test_1<-compute_p(data_pred_1, data_obs_1, "p2")
 data_obs_1<- data_obs_1 %>%
   group_by(pos, run, arch) %>%
   summarise(val = mean(s, na.rm = TRUE))
 
-
 df_target_info<- rbind(df_target_1, df_target_2)
 df_result_calc<- result_test_1
 df_af_sample<- all_runs_af
 df_sel_sample<- all_runs_sel
 
-var_dist<- df_sel_sample%>%dplyr::filter(group=="p1")%>%
-  group_by(run, pos, line, arch)%>%summarise(variance=var(s))%>%
-  ungroup()
-var_dist<- var_dist%>%mutate(across(pos, as.integer))%>%
-  dplyr::filter(pos %in% target_info$pos1)%>%filter(line==1)%>%
-  merge(target_info%>%dplyr::select(run, pos2), by="run")%>%mutate(across(pos, as.integer))%>%
-  mutate(diff_pos=abs(pos-pos2))%>%dplyr::select(!pos2)
-
-var_add<- plot_var_sample1(var_dist%>%filter(arch=="add"), ": Additive")
-var_int<- plot_var_sample1(var_dist%>%filter(arch=="non-add"), ": Epistasis")
-plot(var_add)
-plot(var_int)
-
-
+### Visualization ###
 pred_vs_obs_calc<- modify_result(df_result_calc, target_info) 
 pred_vs_obs_calc$sign<- as.factor(pred_vs_obs_calc$sign)
 p_dist_calc_add<- plot_sig(pred_vs_obs_calc%>%filter(arch=="add"), "Additive")
@@ -136,40 +127,8 @@ p_dist_calc_int<- plot_sig(pred_vs_obs_calc%>%filter(arch=="non-add"), "Epistasi
 print(p_dist_calc_add)
 print(p_dist_calc_int)
 
-
 s_dist_calc<- plot_diff_dist(pred_vs_obs_calc,"Calculated")
 print(s_dist_calc)
 
-
-model_perf_df <- df_result_calc %>%
-  mutate(
-    score = case_when(
-      arch=="add"~ -log10(adj_P),
-      arch=="non-add"~ -log10(adj_P),
-      .default=NA
-    )
-  )%>%
-  mutate(
-    arch = case_when(
-      arch=="add"~ 0,
-      arch=="non-add"~ 1,
-      .default=NA
-    ))
-roc_obj<- roc(model_perf_df$arch, model_perf_df$score)
-auc<- round(auc(model_perf_df$arch, model_perf_df$score),4)
-roc_df<- data.frame(tpp=roc_obj$sensitivities,
-                    fpp=(1-roc_obj$specificities),
-                    threshold=10^(-1*roc_obj$thresholds))
-
-roc_df$j_val<- roc_df$tpp+(1-roc_df$fpp)-1
-coord_1<- roc_df%>%filter(round(threshold,2)==0.01)
-coord_2<- roc_df%>%filter(round(threshold,2)==0.02)
-
-coord_3<- roc_df%>%filter(round(threshold,2)==0.03)
-coord_4<- roc_df%>%filter(round(threshold,2)==0.04)
-coord_5<- roc_df%>%filter(round(threshold,2)==0.05)
-
-
 roc_curve<- plot_roc(roc_df, 0.05)
-
 print(roc_curve)
