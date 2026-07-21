@@ -1,23 +1,23 @@
-#Initialise the population 
+// set up a simulation of two lines mixed in 50:50 ratio
 
 initialize() {
 
 	if (!exists("popFile"))
-		defineConstant("popFile", "pop.txt");
+		defineConstant("popFile", "pop.txt"); //using a population file
 	if (!exists("useBinaryPopfile"))
 		defineConstant("useBinaryPopfile", T);
 	if (!exists("initPop"))
-		defineConstant("initPop", F);
+		defineConstant("initPop", F); //population file will be made with the initSlimSim function
 	if (!exists("popSize"))
-		defineConstant("popSize", 1000);
+		defineConstant("popSize", 1000); //Setting up a population with pop size =1000
 	if (!exists("genomeSize"))
-		defineConstant("genomeSize", 32079331); 
+		defineConstant("genomeSize", 32079331); //length= 3R
 	if (!exists("genomeType"))
-		defineConstant("genomeType", "A");
+		defineConstant("genomeType", "A"); //Autosome
 	if (!exists("markerDist"))
 		defineConstant("markerDist", genomeSize/50);
 	if (!exists("maxGen"))
-		defineConstant("maxGen", 10);
+		defineConstant("maxGen", 10); //10 generations
 	if (!exists("writeOutput"))
 		defineConstant("writeOutput", 10);
 	if (!exists("initFreq"))
@@ -31,11 +31,12 @@ initialize() {
 	if (!exists("vcfPath"))
 		defineConstant("vcfPath", "sample.vcf");
 	initializeSex(genomeType);
-	initializeMutationRate(0.0);
-	initializeMutationType("m1", 0.5, "f", 0.0);
-	initializeMutationType("m4", 0.5, "f", 0.0);
-	initializeMutationType("m5", 0.5, "f", 0.0);
-	
+	initializeMutationRate(0.0); //No mutations
+	initializeMutationType("m1", 0.5, "f", 0.0); //Neutral marker for line A and B
+	initializeMutationType("m4", 0.5, "f", 0.0); //Neutral marker for line C
+	initializeMutationType("m5", 0.5, "f", 0.0); //Background
+
+	//initialize selected SNPs
 	if (exists("targetPos0") & exists("selCoefs")) {
 		defineConstant("targetsGiven", T);
 		defineConstant("numTargets", length(targetPos0));
@@ -52,7 +53,7 @@ initialize() {
 		defineConstant("targetPos0", sort(sample(seqLen(genomeSize), numTargets, replace=F)));
 		if (!exists("selStrength"))
 			defineConstant("selStrength", 0.02);
-		initializeMutationType("m2", 0.5, "g", selStrength, 10);
+		initializeMutationType("m2", 0.5, "g", selStrength, 10); 
 		initializeMutationType("m3", 0.5, "g", -selStrength, 10);
 	}
 	initializeRecombinationRate(recomb);
@@ -71,7 +72,7 @@ targetPos1=targetPos0[0];
 		defineGlobal("selCoefs2", selCoefs2);	
 }
 
-
+//Defining and initializing populations
 1 late(){
 if (initPop) {
 	sim.addSubpop("p1", popSize);
@@ -80,7 +81,8 @@ if (initPop) {
    sim.mutationTypes.mutationStackGroup = 1;
    sim.mutationTypes.mutationStackPolicy = "l";
    sim.mutationTypes.convertToSubstitution = F;
-   
+
+	//Cross AB
    if (targetsGiven) {
    	targetMutType1 = sim.mutationTypes[seqLen(length(targetPos1)) + 1];
       targetMutType2 = sim.mutationTypes[seqLen(length(targetPos2))+ 2];
@@ -91,7 +93,8 @@ if (initPop) {
    p1.individuals.haploidGenome1.addNewDrawnMutation(m1, targetPos2);
    p1.individuals.haploidGenome2.addNewDrawnMutation(targetMutType2, targetPos2);
    p1.individuals.haploidGenome2.addNewDrawnMutation(m1, targetPos1);
-                 
+
+	//Cross AC
    if (targetsGiven) {
      targetMutType1 = sim.mutationTypes[seqLen(length(targetPos1)) + 1];
    } else {
@@ -101,7 +104,8 @@ if (initPop) {
    p2.individuals.haploidGenome1.addNewDrawnMutation(m1, targetPos2);
    p2.individuals.haploidGenome2.addNewDrawnMutation(m4, targetPos1);
    p2.individuals.haploidGenome2.addNewDrawnMutation(m4, targetPos2);
-   
+
+	//Cross BC
    if (targetsGiven) {
       targetMutType2 = sim.mutationTypes[seqLen(length(targetPos2)) + 2];
    } else {
@@ -142,6 +146,7 @@ if (epis > 1.0){
   }
 }
 }
+
 s1 99999 late()
 {
 	p1.species.outputFull();
