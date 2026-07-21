@@ -11,6 +11,8 @@ theme_common <- theme_bw() +
 
 theme_set(theme_common)
 
+### Plotting AF ###
+
 plot_af_gen<- function(df_wide, line){
   
   col_1 <- switch(line,
@@ -47,6 +49,9 @@ plot_af_gen<- function(df_wide, line){
     scale_x_continuous(labels = scales::label_number(scale = 1/1e6)) 
   return(p)
 }
+
+### Plotting the predicted architecture along the genome ###
+
 plot_class<- function(df1, df2, gen_beg, gen_end){
   custom_colors <- c("add" = "navyblue", "dev" = "magenta")
   group_colours<- c("1/3"="#FFBFAA", "2/3"="#FF7B5A", "0/3"="#f9f1f1", "3/3"="#FF0000")
