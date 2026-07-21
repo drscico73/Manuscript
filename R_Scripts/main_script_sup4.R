@@ -12,8 +12,8 @@ library("emmeans")
 library("ggh4x")
 
 ### Load functions ###
-source("Desktop/manuscript_files/functions_empirical_analysis.R")
-source("Desktop/manuscript_files/functions_visualisation.R")
+source("path_to_directory/func_exp_analysis.R")
+source("path_to_directory/func_visual_exp_data.R")
 
 ### Read RDS files having window AF estimates ###
 rds_hel_ho<- readRDS("~/Desktop/manuscript_files/rds_files/hel_ho_out_500.rds")
