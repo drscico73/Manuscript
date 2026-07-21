@@ -1,9 +1,9 @@
 // set up a simulation of two lines mixed in 50:50 ratio
 
 initialize() {
-
+	// using a population file
 	if (!exists("popFile"))
-		defineConstant("popFile", "pop.txt"); //using a population file
+		defineConstant("popFile", "pop.txt"); 
 	if (!exists("useBinaryPopfile"))
 		defineConstant("useBinaryPopfile", T);
 	if (!exists("initPop"))
