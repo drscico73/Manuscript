@@ -14,6 +14,10 @@ library("forcats")
 library("emmeans")
 library("pROC")
 
+## Include the functions ##
+source("path_to_directory/func_slim_analysis.R")
+source("path_to_directory/func_visual_slim.R")
+
 ### Initialization of parameters
 registerDoParallel(cores = parallel::detectCores())
 outFileRds <- "path_to_output_directory/out_slim.rds"
