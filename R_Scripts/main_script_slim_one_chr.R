@@ -21,7 +21,7 @@ numCores <- 12L
 numReps <- 100L 
 slimCmd <- "/usr/local/bin/slim"
 slimScript <- "path_to_slim_script/single_chr.slim"
-popSize <- 1000L
+popSize <- 1250L
 focalGen <- 10L
 
 af_df_add<- list()
