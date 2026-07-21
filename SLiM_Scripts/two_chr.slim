@@ -1,0 +1,180 @@
+// set up a simulation of two lines mixed in 50:50 ratio
+
+initialize() {
+
+	if (!exists("popFile"))
+		defineConstant("popFile", "pop.txt");
+	if (!exists("useBinaryPopfile"))
+		defineConstant("useBinaryPopfile", T); //population file will be made with the initSlimSim function
+	if (!exists("initPop"))
+		defineConstant("initPop", F);
+	if (!exists("chr1_length"))
+		defineConstant("chr1_length", 28085930); //length= 3L
+	if (!exists("chr2_length"))
+		defineConstant("chr2_length", 32079331); //length= 3R
+	if (!exists("popSize"))
+		defineConstant("popSize", 1250);//Setting up a population with pop size =1250
+	if (!exists("genomeSize"))
+		defineConstant("genomeSize", 60165261); 
+	if (!exists("genomeType"))
+		defineConstant("genomeType", "A");//Autosome
+	if (!exists("markerDist"))
+		defineConstant("markerDist", genomeSize/50);
+	if (!exists("maxGen"))
+		defineConstant("maxGen", 11);//10 generations
+	if (!exists("writeOutput"))
+		defineConstant("writeOutput", 11);
+	if (!exists("initFreq"))
+		defineConstant("initFreq", 0.5);
+	if (!exists("domCoefs"))
+		defineConstant("domCoefs", c(0.5,0.5));
+	if (!exists("epis"))
+		defineConstant("epis", 2.0);
+	if (!exists("recomb"))
+		defineConstant("recomb", 2.89e-8);
+	if (!exists("vcfPath"))
+		defineConstant("vcfPath", "sample.vcf");
+		
+	initializeSex(genomeType);
+
+	initializeMutationType("m1", 0.5, "f", 0.0); //Neutral marker for line A and B
+	initializeMutationType("m4", 0.5, "f", 0.0); //Neutral marker for line C
+	initializeMutationType("m5", 0.5, "f", 0.0); //Background
+	
+	//initialize selected SNPs
+	if (exists("targetPos0") & exists("selCoefs")) {
+		defineConstant("targetsGiven", T);
+		defineConstant("numTargets", length(targetPos0));
+		// a selected mutation for each target
+		if (!exists("domCoefs"))
+			defineConstant("domCoefs", rep(0.5, length(selCoefs)));
+		for (i in seqLen(numTargets)) {
+			initializeMutationType(paste0("m", i + 2), domCoefs[i], "f", selCoefs[i]);
+		}
+	} else {
+		defineConstant("targetsGiven", F);
+		if (!exists("numTargets"))
+			defineConstant("numTargets",1);
+		defineConstant("targetPos0", sort(sample(seqLen(chr1_length), numTargets, replace=F)));
+		if (!exists("selStrength"))
+			defineConstant("selStrength", 0.02);
+		initializeMutationType("m2", 0.5, "g", selStrength, 10);
+		initializeMutationType("m3", 0.5, "g", -selStrength, 10);
+	}
+	
+
+initializeGenomicElementType("g1", c(m1,m2,m3,m4,m5), c(0.0,0.0, 0.0, 0.0, 1.0));	
+	
+targetPos1=targetPos0[0];
+		selCoefs1=selCoefs[0];
+		defineGlobal("targetPos1", targetPos1);
+		defineGlobal("selCoefs1", selCoefs1);	
+	
+		targetPos2=targetPos0[1];
+		selCoefs2=selCoefs[1];
+		defineGlobal("targetPos2", targetPos2);
+		defineGlobal("selCoefs2", selCoefs2);	
+		
+		initializeChromosome(1, chr1_length);
+		initializeGenomicElement(g1, 0, chr1_length-1);
+		initializeMutationRate(0); //No mutations
+		initializeRecombinationRate(2.89e-08);
+		
+		initializeChromosome(2, chr2_length);
+		initializeGenomicElement(g1, 0, chr2_length-1);
+		initializeMutationRate(0);  //No mutations
+		initializeRecombinationRate(2.89e-08);
+}
+
+//Defining and initializing populations
+1 late(){
+if (initPop) {
+	sim.addSubpop("p1", popSize);
+	sim.addSubpop("p2", popSize);
+   sim.addSubpop("p3", popSize);
+   sim.mutationTypes.mutationStackGroup = 1;
+   sim.mutationTypes.mutationStackPolicy = "l";
+   sim.mutationTypes.convertToSubstitution = F;
+   
+   //Cross AB
+   if (targetsGiven) {
+   	targetMutType1 = sim.mutationTypes[seqLen(length(targetPos1)) + 1];
+      targetMutType2 = sim.mutationTypes[seqLen(length(targetPos2))+ 2];
+   } else {
+      targetMutType = sample(sim.mutationTypes[1:2], numTargets, replace=T);
+   }
+   for(ind in p1.individuals){
+   
+ind.haplosomesForChromosomes(1)[0].addNewDrawnMutation(targetMutType1, targetPos1);
+ind.haplosomesForChromosomes(2)[0].addNewDrawnMutation(m1, targetPos2);
+ind.haplosomesForChromosomes(2)[1].addNewDrawnMutation(targetMutType2, targetPos2);
+ind.haplosomesForChromosomes(1)[1].addNewDrawnMutation(m1, targetPos1);
+   }
+   
+   //Cross AC         
+   if (targetsGiven) {
+     targetMutType1 = sim.mutationTypes[seqLen(length(targetPos1)) + 1];
+   } else {
+     targetMutType = sample(sim.mutationTypes[1:2], numTargets, replace=T);
+   }
+for(ind in p2.individuals){
+   
+ind.haplosomesForChromosomes(1)[0].addNewDrawnMutation(targetMutType1, targetPos1);
+ind.haplosomesForChromosomes(2)[0].addNewDrawnMutation(m1, targetPos2);
+ind.haplosomesForChromosomes(1)[1].addNewDrawnMutation(m4, targetPos1);
+ind.haplosomesForChromosomes(2)[1].addNewDrawnMutation(m4, targetPos2);
+   }   
+  
+  //Cross BC
+   if (targetsGiven) {
+      targetMutType2 = sim.mutationTypes[seqLen(length(targetPos2)) + 2];
+   } else {
+      targetMutType = sample(sim.mutationTypes[1:2], numTargets, replace=T);
+   }
+for(ind in p3.individuals){
+   
+ind.haplosomesForChromosomes(2)[0].addNewDrawnMutation(targetMutType2, targetPos2);
+ind.haplosomesForChromosomes(1)[0].addNewDrawnMutation(m1, targetPos1);
+ind.haplosomesForChromosomes(2)[1].addNewDrawnMutation(m4, targetPos2);
+ind.haplosomesForChromosomes(1)[1].addNewDrawnMutation(m4, targetPos1);
+   }       
+   
+   if (useBinaryPopfile) {
+			sim.outputFull(filePath=popFile, binary=T);
+		} else {
+			sim.outputFull(filePath=popFile);
+		}
+		sim.simulationFinished();
+	} else {
+		sim.readFromPopulationFile(popFile);
+	}
+	
+	sim.recalculateFitness();
+	suppressWarnings(T);
+	print(writeOutput);
+	community.rescheduleScriptBlock(s1, start=asInteger(writeOutput[0]), end=asInteger(writeOutput[0]));
+	defineGlobal("nextWriteIdx", 0);
+}
+
+2: late(){
+	inds=p1.individuals;
+   if (exists("m2")) {
+      for (ind in inds){
+      	if (sum(ind.haplosomesNonNull.countOfMutationsOfType(m2))>0 & sum(ind.haplosomesNonNull.countOfMutationsOfType(m3))>0){
+      					ind.fitnessScaling=asFloat(epis);
+      	} 
+      }
+  }
+}
+s1 99999 late()
+{
+	p1.species.outputFull();
+	p1.species.outputFixedMutations();
+	if (community.tick >= maxGen)
+		sim.simulationFinished();
+	nextWriteIdx = nextWriteIdx + 1;
+	if (length(writeOutput) > nextWriteIdx)
+		community.rescheduleScriptBlock(s1,
+		start=asInteger(writeOutput[nextWriteIdx]),
+		end=asInteger(writeOutput[nextWriteIdx]));
+}
