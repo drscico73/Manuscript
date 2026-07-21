@@ -13,6 +13,9 @@ theme_common<- theme_bw()+
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()
   )
+
+### Plotting predicted vs true architecture ###
+
 plot_sig<- function(df, arch_type){
   df$sign<- as.factor(df$sign)
   result_color<- c("0"="green2", "1"="red2")
@@ -31,6 +34,9 @@ plot_sig<- function(df, arch_type){
   
   return(p_dist_plot)
 }
+
+### Plotting the difference between the predicted and calculated selection response as a function of distance between the two selected targets ###
+
 plot_diff_dist<- function(df, suffix){
   arch_color<- c("add"="yellow", "non-add"="pink")
   s_dist_plot<- ggplot(df, aes(x = diff_pos,
@@ -49,6 +55,9 @@ plot_diff_dist<- function(df, suffix){
   
   return(s_dist_plot)
 }
+
+### Plotting roc curve ###
+
 plot_roc<- function(df, thresh){
   plot_color = '#233f7d'  
   text_color = 'black' 
