@@ -14,11 +14,11 @@ library("forcats")
 library("emmeans")
 library("pROC")
 
-## Include the functions ##
+### Include the functions ###
 source("path_to_directory/func_slim_analysis.R")
 source("path_to_directory/func_visual_slim.R")
 
-### Initialization of parameters
+### Initialization of parameters ###
 registerDoParallel(cores = parallel::detectCores())
 outFileRds <- "path_to_output_directory/out_slim.rds"
 numCores <- 12L
@@ -82,6 +82,7 @@ for(i in 1:400){
 }
 
 ### Combine and filter the results ###
+
 all_runs_af_add<- bind_rows(af_df_add)
 all_runs_af_add$arch<- paste("add")
 all_runs_sel_add<- bind_rows(sel_df_add)
@@ -107,6 +108,7 @@ sel_sample2<- all_runs_sel%>%filter(group=="p2")
 sel_sample3<- all_runs_sel%>%filter(group=="p3")
 
 ### Hypothesis testing: s_1(AB)=s_1(AC)-s_1(BC) ###
+
 test1_lhs<- sel_sample2%>%dplyr::filter(line=="A")
 test1_rhs<- sel_sample3%>%dplyr::filter(line=="B")
 data_pred_1<- rbind(test1_lhs, test1_rhs)
