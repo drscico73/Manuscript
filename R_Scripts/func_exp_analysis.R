@@ -1,5 +1,6 @@
 
-#Cleaning up raw data for downstream processing
+### Cleaning up raw data for downstream processing ###
+
 process_data <- function(df) {
   # List of known reference sample names
   ref_samples <- c("Dmel_OregonR_non-inbred", "Dmel_Helsinki_inbred_F11", "Dmel_Samarkand_inbred")
@@ -60,7 +61,8 @@ process_data <- function(df) {
   return(df)
 }
 
-#Calculating logit-transformed AF
+### Calculating logit-transformed AF ###
+
 logit_freq<- function(samp_df){
   line_a<- colnames(samp_df)[ncol(samp_df)-1]
   line_b<- colnames(samp_df)[ncol(samp_df)]
@@ -78,7 +80,8 @@ logit_freq<- function(samp_df){
   return(temp_df)
 }
 
-#Hypothesis testing and computing FDR to classifying a region as significantly deviating (1) or not (0)
+### Hypothesis testing and computing FDR to classifying a region as significantly deviating (1) or not (0) ###
+
 compute_p<- function(data_merge,  data_sample, ref){
   data_merge<- data_merge%>% dplyr::select(c("window", "group", "rep", "s", "mpos","chr"))
   data_merge$window<- as.factor(data_merge$window)
@@ -124,7 +127,8 @@ compute_p<- function(data_merge,  data_sample, ref){
   return(merge_df)
 }
 
-#Combining significance information for all the three tests
+### Combining significance information for all the three tests ###
+
 find_pattern<- function( merge_df){
   
   merge_df<- merge_df %>%
