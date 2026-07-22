@@ -14,11 +14,11 @@ library("forcats")
 library("emmeans")
 library("pROC")
 
-## Include the functions ##
+### Include the functions ###
 source("path_to_directory/func_slim_analysis.R")
 source("path_to_directory/func_visual_slim.R")
 
-### Initialization of parameters
+### Initialization of parameters ###
 registerDoParallel(cores = parallel::detectCores())
 outFileRds <- "path_to_output_directory/out_slim.rds"
 numCores <- 12L
@@ -107,6 +107,7 @@ sel_sample2<- all_runs_sel%>%filter(group=="p2")
 sel_sample3<- all_runs_sel%>%filter(group=="p3")
 
 ### Hypothesis testing: s_1(AB)=s_1(AC)-s_1(BC) ###
+
 test1_lhs<- sel_sample2%>%dplyr::filter(line=="A")
 test1_rhs<- sel_sample3%>%dplyr::filter(line=="B")
 data_pred_1<- rbind(test1_lhs, test1_rhs)
@@ -124,6 +125,7 @@ df_af_sample<- all_runs_af
 df_sel_sample<- all_runs_sel
 
 ### Visualization ###
+
 pred_vs_obs_calc<- modify_result(df_result_calc, target_info) 
 pred_vs_obs_calc$sign<- as.factor(pred_vs_obs_calc$sign)
 p_dist_calc_add<- plot_sig(pred_vs_obs_calc%>%filter(arch=="add"), "Additive")
