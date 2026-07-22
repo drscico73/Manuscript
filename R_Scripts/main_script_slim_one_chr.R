@@ -121,12 +121,9 @@ data_obs_1<- data_obs_1 %>%
   summarise(val = mean(s, na.rm = TRUE))
 
 df_target_info<- rbind(df_target_1, df_target_2)
-df_result_calc<- result_test_1
-df_af_sample<- all_runs_af
-df_sel_sample<- all_runs_sel
 
 ### Visualization ###
-pred_vs_obs_calc<- modify_result(df_result_calc, target_info) 
+pred_vs_obs_calc<- modify_result(result_test_1, target_info) 
 pred_vs_obs_calc$sign<- as.factor(pred_vs_obs_calc$sign)
 p_dist_calc_add<- plot_sig(pred_vs_obs_calc%>%filter(arch=="add"), "Additive")
 p_dist_calc_int<- plot_sig(pred_vs_obs_calc%>%filter(arch=="non-add"), "Epistasis")
