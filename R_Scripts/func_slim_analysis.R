@@ -1,4 +1,5 @@
 ### Make a population file which will be used to initialise the populations in each iteration ###
+
 initSlimSim <- function(targetPos1, selCoefs, popFile, popSize, initFreq, epis, domCoefs, seed, slimCmd, slimScript) {
   selCoefs[abs(selCoefs) < sqrt(.Machine$double.eps)] <- 0
   slimArgs <- paste0(
@@ -16,7 +17,9 @@ initSlimSim <- function(targetPos1, selCoefs, popFile, popSize, initFreq, epis, 
   slimCmdLine <- paste(slimCmd, slimArgs, slimScript)
   system(slimCmdLine)
 }
+
 ### Run the simulation ###
+
 runSlimSim <- function(targetPos1, selCoefs, popFile, seed, maxGen, writeOutput, popSize, initFreq, epis, domCoefs,
                        slimCmd, slimScript) {
   selCoefs[abs(selCoefs) < sqrt(.Machine$double.eps)] <- 0
@@ -39,6 +42,9 @@ runSlimSim <- function(targetPos1, selCoefs, popFile, seed, maxGen, writeOutput,
   slimCmdLine <- paste(slimCmd, slimArgs, slimScript)
   system(slimCmdLine, intern = TRUE)
 }
+
+### Get frequencies ###
+
 newGetSimFreqs2 <- function(slimCmd, slimScript) {
   function(atPos, atGen, targetPos, selCoefs, popSize, initFreq, epis, domCoefs,
            seedBase = seed, numReps, run, saveSims = NULL, atGens = NULL) {
@@ -99,6 +105,7 @@ newGetSimFreqs2 <- function(slimCmd, slimScript) {
     marker2<- targetPos[2]-1
 
     #Identify the source line for mutation in the population
+
     sample1<- results%>%filter(pop=="p1")
     sample1<- sample1%>%mutate(line=ifelse(pos %in% marker1 & mut_type!="m1", "1", 
                                            ifelse(pos %in% marker2 & mut_type!="m1", "2", 
@@ -135,7 +142,9 @@ newGetSimFreqs2 <- function(slimCmd, slimScript) {
     return(df_sample)
   }
 }
-### Clean the raw data obtained from slim ###
+
+### Clean the raw data obtained from slim to retain only the relevant information: mutation frequencies in each population###
+
 clean_data<- function(df, mut_start, ind_start, hap_start){
   cleaned_df<- df[(mut_start + 1):(hap_start - 1)] %>%
     as.data.frame() %>%
@@ -154,7 +163,9 @@ clean_data<- function(df, mut_start, ind_start, hap_start){
     mutate(freq=count/2500)
   return(cleaned_df)
 }
+
 ### Calculate marker AF ###
+
 get_freq<- function(df_lines){
   mut_start <- grep("^Mutations:", df_lines)
   ind_start <- grep("^Individuals:", df_lines)
@@ -162,7 +173,9 @@ get_freq<- function(df_lines){
   
   new_df <- clean_data(df_lines, mut_start, ind_start, hap_start)
 }
+
 ### Calculating logit-transformed AF ###
+
 logit_freq<- function(samp_df){
   line_a<- colnames(samp_df)[ncol(samp_df)-1]
   line_b<- colnames(samp_df)[ncol(samp_df)]
@@ -181,7 +194,9 @@ logit_freq<- function(samp_df){
     dplyr::rename("group"=pop)
   return(temp_df)
 }
-### Calculate selection Coefficient ###
+
+### Calculate response to selection ###
+
 logit_sel<- function(df){
   sample1<- df%>%filter(pop=="p1")
   sample2<- df%>%filter(pop=="p2")
@@ -207,7 +222,9 @@ logit_sel<- function(df){
   logit_sample<- rbind(logit_sample1, logit_sample2, logit_sample3)
   return(logit_sample)
 }
+
 ### Merge the result from the hypothesis testing ###
+
 find_pattern<- function( merge_df){
   merge_df<- merge_df %>%group_by(run, case)
   mutate(
@@ -221,6 +238,7 @@ find_pattern<- function( merge_df){
     TRUE ~ 4
   ))
 }
+
 modify_result<- function(df, target){
   pred_df<- df%>%dplyr::select(pos, run, contrast, s_val, arch)%>%
     dplyr::rename("pred"=contrast, "obs"=s_val)%>%mutate(diff_s=pred-obs)
