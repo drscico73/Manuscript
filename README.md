@@ -9,22 +9,39 @@ The workflows include:
 * Genome-wide statistical testing
 * Forward-time SLiM simulations
 * Empirical threshold estimation for genome-wide t-tests
+* Testing for deviations from additive assumption
 
 ---
 
 # Repository Structure
 
-| File                    | Description                                      |
-| ----------------------- | ------------------------------------------------ |
-| `AFnS_plots.R`          | Allele frequency and selection response analysis |
-| `H0_Check.R`            | Single-chromosome SLiM simulations               |
-| `H0_Check2Chrom.R`      | Two-chromosome SLiM simulations                  |
-| `threshold_for_ttest.R` | Empirical significance threshold estimation      |
-| `H0_Check.slim`         | SLiM model for single-chromosome simulations     |
-| `H0_2Chrom.slim`        | SLiM model for two-chromosome simulations        |
-| `Threshold.slim`        | SLiM model for null simulations                  |
-| `threshold_seeds.txt`   | Seeds for reproducible threshold simulations     |
-| `*.txt` marker files    | Marker/window positions used in simulations      |
+| File                        | Description                                                              |
+| --------------------------- | ------------------------------------------------------------------------ |
+| `AFnS_plots.R`              | Allele frequency and selection response analysis for directional crosses |
+| `H0_Check.R`                | Single-chromosome SLiM simulations for directional crosses               |
+| `H0_Check2Chrom.R`          | Two-chromosome SLiM simulations for directional crosses                  |
+| `threshold_for_ttest.R`     | Empirical significance threshold estimation                              |
+| `func_exp_analysis.R`       | Functions for analysis of experimental data for 3x2 crosses              |
+| `func_slim_analysis.R`      | Functions for analysis of SLiM simulations for 3x2 crosses               |
+| `func_visual_exp_data.R`    | Functions for visualization of experimental data for 3x2 crosses         |
+| `func_visual_slim.R`        | Functions for visualization of SLiM simulation data for 3x2 crosses      |
+| `main_script_exp_data.R`    | Main script for analysis of experimental data for 3x2 crosses            |
+| `main_script_slim_dom.R`    | Main script for dominance simulations in 3x2 crosses                     |
+| `main_script_slim_one_chr.R`| Main script for single-chromosome SLiM simulations for 3x2 crosses       |
+| `main_script_two_chr.R`     | Main script for two-chromosome SLiM simulations for 3x2 crosses          |
+| `predef_win_haploFreq.R`    | Script for calculating allele frequencies using predefined windows       |
+| `haploFreq.R`               | Script for calculating allele frequencies using step and window size     |
+| `H0_Check.slim`             | SLiM model for single-chromosome simulations for directional crosses     |
+| `H0_2Chrom.slim`            | SLiM model for two-chromosome simulations for directional crosses        |
+| `Threshold.slim`            | SLiM model for null simulations                                          |
+| `one_chr.slim`              | SLiM model for one-chromosome simulations for 3x2 crosses                |
+| `two_chr.slim`              | SLiM model for two-chromosome simulations for 3x2 crosses                |
+| `threshold_seeds.txt`       | Seeds for reproducible threshold simulations                             |
+| `markers*.txt`              | Marker/window positions used in simulations                              |
+| `ore_marker_file.txt`       | Marker SNPs for OregonR                                                  |
+| `hel_marker_file.txt`       | Marker SNPs for Helsinki                                                 | 
+| `sam_marker_file.txt`       | Marker SNPs for Samarkand                                                |
+| `window_coordinates.txt`    | Predefined window coordinates for 3x2 crosses                            |
 
 ---
 
