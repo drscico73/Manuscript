@@ -53,7 +53,6 @@ The workflows include:
 data.table
 dplyr
 tidyr
-tidyverse
 ggplot2
 ggpubr
 scales
@@ -66,6 +65,16 @@ patchwork
 cowplot
 stringr
 stats
+emmeans
+ggh4x
+forcats
+pROC
+docopt
+MASS
+Matrix
+matrixStats
+quadprog
+fuzzyjoin
 ```
 
 ## External Software
