@@ -1,8 +1,5 @@
 ### Loading the libraries ###
 library("tidyverse")
-library("ggplot2")
-library("dplyr")
-library("tidyr")
 library("stringr")
 library("patchwork")
 library("scales")
