@@ -84,6 +84,7 @@ fuzzyjoin
 
   * `sed`
   * `cut`
+  * `grep`
 
 ---
 
