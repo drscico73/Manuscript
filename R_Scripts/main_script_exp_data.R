@@ -1,6 +1,5 @@
 ### Loading the libraries ###
 library("tidyverse")
-library("stringr")
 library("patchwork")
 library("scales")
 library("poolSeq")
