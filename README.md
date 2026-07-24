@@ -252,7 +252,7 @@ The simulations generate null distributions of allele frequency change across mu
 The simulation uses the same window positions/marker positions as used in the allele frequency estimation to keep the number of windows consistent & test the multiple testing load due to the high number of windows.
 
 The repository also includes the supporting files required:
-* The marker `.txt` files required for simulations and chromosome setup.
+* The marker `markers*.txt` files required for simulations and chromosome setup.
 *  Seed files for reproducible simulations (`threshold_seeds.txt`)
 
 
