@@ -43,9 +43,6 @@ allowed_2 <- setdiff(1:genomeSize, unique(target_1))
 selCoefs_1 <- runif(1, min=0, max=0.1)
 selCoefs_2 <- runif(1, min=0, max=0.1)
 selCoefs<- c(selCoefs_1, selCoefs_2)
-# sortInfo <- sort(allTargetPos, index.return = TRUE)
-# targetPos <- sortInfo$x
-# selCoefs  <- allSelCoefs[sortInfo$ix]
 epis = 2.00
 domCoefs <- c(0.5, 0.5)
 
