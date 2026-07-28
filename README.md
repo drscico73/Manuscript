@@ -1,4 +1,4 @@
-# Selection Response Simulations and Allele Frequency Analysis
+# Scripts for SLiM Simulations and Allele Frequency Analysis in R
 
 This repository contains R and SLiM scripts used to analyze allele frequency dynamics and simulate selection responses in experimental evolution populations.
 
