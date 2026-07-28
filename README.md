@@ -143,7 +143,7 @@ Genome-wide significance plot showing statistically significant loci.
 
 ------
 
-# 2. Single-Chromosome SLiM Simulations
+# 2. Single-Chromosome SLiM Simulations: Directional Crosses
 
 ## Scripts
 
@@ -197,7 +197,7 @@ Simulation outputs are written as tab-delimited files.
 
 ---
 
-# 3. Two-Chromosome SLiM Simulations
+# 3. Two-Chromosome SLiM Simulations: Directional Crosses
 
 ## Scripts
 
@@ -280,6 +280,18 @@ The script generates:
 * empirical p-value histograms,
 * significance threshold estimates.
 
+
+-----
+
+# 5. Testing for Deviations from Additive Assumption: 3x2 Crosses
+
+## Scripts
+
+* `main_script_exp_data.R`
+* `func_exp_analysis.R`
+* `func_visual_exp_data.R`
+
+## Overview
 
 -----
 
