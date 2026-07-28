@@ -231,7 +231,7 @@ run_once <- function(dist_bp, seed) {
 set.seed(123)
 seed_base <- sample(1e8:9e8,length(distances_bp))
                           
-# run simulations
+# run simulations for additive and epistatic scenario separately
 all_results <- map2_dfr(
   distances_bp,
   seed_base,
