@@ -464,7 +464,7 @@ The pipeline supports two scenarios:
  
 ## Output Plots
 
-Both ***main_script_slim_one_chr.R*** and ***main_Script_slim_two_chr.R*** generate the following plots:
+Both ***main_script_slim_one_chr.R*** and ***main_script_slim_two_chr.R*** generate the following plots:
 
 ### `p_dist_calc_add`
 
@@ -482,9 +482,98 @@ The effect of the distance between the selection targets (or markers; X-axis) on
 
 The receiver-operating curve.
 
+## Output Data
+
+### `pred_vs_obs_calc`
+
+The output containing the following information:
+* `run`: Each run describes a unique position of target 2
+* `arch`: The underlying simulated genetic architecture
+* `pos`: Position of target 1
+* `pred`: Predicted selection response
+* `obs`: Observed selection response
+* `diff_s`: pred-obs
+* `diff_pos`: Distance between target 1 and target 2
+* `adj_P`: FDR corrected p-values
+* `p_value`: Raw p-values from hypothesis testing
+* `sign`: Predicted architecture; 0- Additive and 1- Non-additive (epistatic)
+
 -----
+# 6. Epistasis Simulations: 3x2 Crosses
+
+## Scripts
+
+* `main_script_slim_dom.R``
+* `func_slim_analysis.R`
+* `func_visual_slim.R`
+* `one_chr.slim`
+
+## Overview
+
+These scripts perform forward-time SLiM simulations to investigate how genomic distance affects the contribution of dominance to the response to selection. It tests this when there are two targets located on the same chromosome but on different haplotypes. The simulation model is described in ***one_chr.slim***. The analysis is done using ***main_script_slim_dom.R***
+
+The pipeline tests the relationship:
+
+**s_A(AB) = s_A(AC) − s_B(BC)**
+
+where *s_A* and *s_B* represent the selection response of the marker allele from lines A and B, respectively. *AB*, *AC*, and *BC* represent crosses between lines A and B, lines A and C, and lines B and C, respectively. To investigate the effect of genomic distance, the genomic position of target A is kept constant, while the position of target B is systematically varied across 400 different genomic positions. 
 
 
+## Simulation Parameters
+
+|Parameter|Description|
+|------|------|
+|popSize|Population size|
+|numReps|Number of replicate simulations|
+|genomeSize|Size of the chromosome|
+|domCoefs|Dominance coefficients|
+|epis|Epistasis coefficient|
+|targetPos0|Vector containing the marker positions of line A and line B|
+|selCoefs|Vector containing the selection coefficients of markers of line A and line B|
+|focalGen|Generation to generate the output|
+|seed|Seed for the simulations|
+
+
+## Simulation Scenarios
+
+The pipeline supports 9 scenarios: 
+
+|Serial Number|Architecture|Dominance Coefficient Target 1|Dominance Coefficient Target 1|
+|-----|-----|-----|----|
+|1|rec-rec|0|0|
+|2|rec-codom|0|0.5|
+|3|codom-rec|0.5|0|
+|4|codom-codom|0.5|0.5|
+|5|codom-dom|0.5|1|
+|6|dom-codom|1|0.5|
+|7|dom-dom|1|1|
+|8|dom-rec|1|0|
+|9|rec-dom|0|1|
+
+## Functions for running simulations and analysis of simulation results
+
+1. `initSlimSim()`: Function specifying the parameters for initializing the simulation and generating a temporary population file. The population file makes the subsequent simulations faster.
+2. `runSlimSim()`: Function specifying the parameters for running the simulation.
+3. `clean_data()` and `get_freq()`: Cleans the output from SLiM to get marker allele frequencies
+4. `newGetSimFreqs2()`: Runs the simulation the specified number of times (`numReps`) and processes the output to generate marker allele frequencies for only the amrkers present in the focal population. Returns a dataframe containing marker allele frequencies for all the populations.
+5. `logit_freq()` and `logit_sample()`: Calculates the selection response as logit-transformed allele frequencies.
+6. `modify_result()`: Classifies deviations as significant(1) or insignificant (0).
+ 
+## Output Data
+
+### `pred_vs_obs_calc`
+
+The output containing the following information:
+* `run`: Each run describes a unique position of target 2
+* `arch`: The underlying simulated genetic architecture
+* `pos`: Position of target 1
+* `pred`: Predicted selection response
+* `obs`: Observed selection response
+* `diff_s`: pred-obs
+* `diff_pos`: Distance between target 1 and target 2
+* `adj_P`: FDR corrected p-values
+* `p_value`: Raw p-values from hypothesis testing
+* `sign`: Predicted architecture; 0- Additive and 1- Non-additive (Dominant)
 -----
 
 # General Notes
