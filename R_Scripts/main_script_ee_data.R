@@ -8,8 +8,8 @@ library("emmeans")
 library("ggh4x")
 
 ### Load functions ###
-source("path_to_directory/func_exp_analysis.R")
-source("path_to_directory/func_visual_exp_data.R")
+source("path_to_directory/func_ee_analysis.R")
+source("path_to_directory/func_visual_ee_data.R")
 
 ### Read RDS files having window AF estimates ###
 rds_hel_ho<- readRDS("~/Desktop/manuscript_files/rds_files/hel_ho_out_500.rds")
@@ -67,6 +67,11 @@ sel_so<- logit_freq(data_so)%>%group_by(chr, mpos, group, rep, gen)%>%pivot_wide
   dplyr::rename("ore_s_so"=ore, "sam_s_so"=sam)%>%filter(gen=="10")%>%dplyr::select(!gen)
 sel_hs<- logit_freq(data_hs)%>%group_by(chr, mpos, group, rep, gen)%>%pivot_wider(names_from = line, values_from = s)%>%ungroup()%>%
   dplyr::rename("sam_s_hs"=sam, "hel_s_hs"=hel)%>%filter(gen=="10")%>%dplyr::select(!gen)
+
+### Visualizing Expectated vs Observed selection response in SO-OS ###
+
+plot_so_exp_obs<- plot_exp_obs_s(sel_ho, sel_so, sel_hs, win_af)
+print(plot_so_exp_obs)
 
 ### Testing for deviations from additive assumption ###
 #Estimating deviation as the difference between the predicted logit AF and logit AF calculated from the sample
