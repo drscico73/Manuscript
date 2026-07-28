@@ -394,7 +394,7 @@ Expected vs Observed selection response in SO-OS.
 
 Genome-wide visualization of deviations from additive expectations, showing calculated versus expected logit allele-frequency differences and genomic regions classified according to the number of significant tests.
 
-## Main Output Objects
+## Output Data
 
 ### `merge_df_10`
 
