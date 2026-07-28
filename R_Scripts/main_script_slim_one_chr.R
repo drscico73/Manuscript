@@ -104,7 +104,7 @@ sel_sample1<- all_runs_sel%>%filter(group=="p1")
 sel_sample2<- all_runs_sel%>%filter(group=="p2")
 sel_sample3<- all_runs_sel%>%filter(group=="p3")
 
-### Hypothesis testing: s_1(AB)=s_1(AC)-s_1(BC) ###
+### Hypothesis testing: s_A(AB)=s_A(AC)-s_B(BC) ###
 
 test1_lhs<- sel_sample2%>%dplyr::filter(line=="A")
 test1_rhs<- sel_sample3%>%dplyr::filter(line=="B")
