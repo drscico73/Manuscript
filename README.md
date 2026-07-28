@@ -584,7 +584,7 @@ The output containing the following information:
 * The same simulation framework can be adapted for alternative chromosome architectures or fitness models.
 * The simulations assume diploid genomes and converts mutation counts to frequencies accordingly.
 * Using the provided seed files is recommended for reproducible simulations (Threshold.slim).
-* Output paths in the scripts should be modified before execution. 
+* Input and output paths in the scripts should be modified before execution.
 
   
 ------------------------
