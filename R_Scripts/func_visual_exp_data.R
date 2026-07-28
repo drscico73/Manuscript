@@ -52,24 +52,24 @@ plot_af_gen<- function(df_wide, line){
 
 ### Plotting expected vs observed selection response for one cross
 
-plot_exp_obs_s<- function(sel_ho_10, sel_hs_10, sel_so_10, data_ho){
-mean_sel_ho<- sel_ho_10%>%
+plot_exp_obs_s<- function(sel_ho, sel_hs, sel_so, win_af){
+mean_sel_ho<- sel_ho%>%
   group_by(mpos, chr)%>%
   summarise_at(vars(ore_s_ho), list(ore_s=mean))
-mean_sel_hs<- sel_hs_10%>%
+mean_sel_hs<- sel_hs%>%
   group_by(mpos, chr)%>%
   summarise_at(vars(sam_s_hs), list(sam_s=mean))
-mean_sel_so<- sel_so_10%>%
+mean_sel_so<- sel_so%>%
   group_by(mpos, chr)%>%
   summarise_at(vars(ore_s_so), list(obs=mean))
-exp_vs_obs_10<- merge(mean_sel_ho, mean_sel_hs, by=c("mpos", "chr"))
-exp_vs_obs_10$exp<- exp_vs_obs_10$ore_s - exp_vs_obs_10$sam_s
-exp_vs_obs_10<- merge(exp_vs_obs_10, mean_sel_so, by=c("mpos", "chr"))
-exp_vs_obs_10<- merge(exp_vs_obs_10, win_af%>%dplyr::rename("mpos"=pos)%>%
+exp_vs_obs<- merge(mean_sel_ho, mean_sel_hs, by=c("mpos", "chr"))
+exp_vs_obs$exp<- exp_vs_obs$ore_s - exp_vs_obs$sam_s
+exp_vs_obs<- merge(exp_vs_obs, mean_sel_so, by=c("mpos", "chr"))
+exp_vs_obs<- merge(exp_vs_obs, win_af%>%dplyr::rename("mpos"=pos)%>%
                         select(c("mpos", "chr", "window"))%>%distinct(),by=c("mpos", "chr") )
-exp_vs_obs_10<- exp_vs_obs_10%>%select(c("chr", "window", "mpos", "exp", "obs"))
+exp_vs_obs<- exp_vs_obs%>%select(c("chr", "window", "mpos", "exp", "obs"))
 
-df<- exp_vs_obs_10%>%pivot_longer(cols=c("obs", "exp"), 
+df<- exp_vs_obs%>%pivot_longer(cols=c("obs", "exp"), 
                             names_to = "line", values_to = "s")
 custom_colors <- c("exp" = "orange", "obs" = "green4")
 df$color_group <- with(df, ifelse(line == "exp", "exp","obs"))
