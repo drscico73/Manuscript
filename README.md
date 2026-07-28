@@ -348,7 +348,9 @@ For each pairwise comparison, allele frequencies estimated from two independent 
 
 Selection response is calculated with `logit_freq()` as the log ratio of allele frequencies: 
 
-s= log(AF_A/AF_B)
+z = log[AF_A/(1-AF_A)]
+
+where AF_A is the window allele frequency for line A
 
 ## Additive Expectation and Deviation and Statistical Testing
 
@@ -363,11 +365,11 @@ Genome-wide statistical tests are performed independently for each genomic windo
 
 lm( s ~ group, data = .)
 
-`emmeans` is used to estimate the expected contrast, which is compared with the observed selection response of the focal population.
+`emmeans` is used to estimate the expected contrast, which is compared with the observed z of the focal population.
 
 FDR is estimated using the ***Benjamini-Hochberg*** method. Genomic windows with ***Adjusted P ≤ 0.05*** are classified as a significant deviation from additivity. 
 
-The three additive expectations tested are: 
+The three hypotheses tested are: 
 
 H(HO-OH) - S(SO-OS) = H(HS-SH) 
 
@@ -383,7 +385,7 @@ The deviation from the additive expectation is calculated as: ***Deviation = Obs
 Significance across the three additive tests is combined using `find_pattern()` to classify each window: 
 
 |Classification|Description|
-|------|-------
+|------|-------|
 |0/3|No significant deviations comparisons|
 |1/3|Significant deviations in one comparison|
 |2/3|Significant deviations in two comparisons|
@@ -397,7 +399,7 @@ Combined allele-frequency trajectories across genomic positions and chromosomes 
 
 ### `plot_so_exp_obs`
 
-Expected vs Observed selection response in SO-OS.
+Expected vs Observed `z` in SO-OS.
 
 ### `plot_class_res_10`
 
@@ -434,9 +436,9 @@ These scripts perform forward-time SLiM simulations to investigate how genomic d
 
 The pipeline tests the relationship:
 
-**s_A(AB) = s_A(AC) − s_B(BC)**
+**z_A(AB) = z_A(AC) − z_B(BC)**
 
-where *s_A* and *s_B* represent the selection response of the marker allele from lines A and B, respectively. *AB*, *AC*, and *BC* represent crosses between lines A and B, lines A and C, and lines B and C, respectively. 
+where *z_A* and *z_B* represent the selection response of the marker allele from lines A and B, respectively. *AB*, *AC*, and *BC* represent crosses between lines A and B, lines A and C, and lines B and C, respectively. 
 
 To investigate the effect of genomic distance, the genomic position of target A is kept constant, while the position of target B is systematically varied across 400 different genomic positions. For each position of target B, the simulation is run and the relationship above is tested to assess how the genomic distance between the two interacting targets affects the ability to detect the epistatic contribution to the response to selection.
 
@@ -523,9 +525,9 @@ These scripts perform forward-time SLiM simulations to investigate how genomic d
 
 The pipeline tests the relationship:
 
-**s_A(AB) = s_A(AC) − s_B(BC)**
+**z_A(AB) = z_A(AC) − z_B(BC)**
 
-where *s_A* and *s_B* represent the selection response of the marker allele from lines A and B, respectively. *AB*, *AC*, and *BC* represent crosses between lines A and B, lines A and C, and lines B and C, respectively. To investigate the effect of genomic distance, the genomic position of target A is kept constant, while the position of target B is systematically varied across 400 different genomic positions. 
+where *z_A* and *z_B* represent the selection response of the marker allele from lines A and B, respectively. *AB*, *AC*, and *BC* represent crosses between lines A and B, lines A and C, and lines B and C, respectively. To investigate the effect of genomic distance, the genomic position of target A is kept constant, while the position of target B is systematically varied across 400 different genomic positions. 
 
 
 ## Simulation Parameters
