@@ -417,7 +417,7 @@ Combined genome-wide deviation estimates across all three comparisons.
 
 ## Overview
 
-These scripts perform forward-time SLiM simulations to investigate how genomic distance can affect the effect that epistasis can have on the response to selection when both the interacting targets are on the same chromosome but different haplotypes.. The simulation is described in one_chr.slim. 
+These scripts perform forward-time SLiM simulations to investigate how genomic distance can affect the effect of epistasis on the response to selection when both interacting targets are on the same chromosome but on different haplotypes. The simulation is described in ***one_chr.slim***. 
 
 ## Simulation Parameters
 
@@ -435,6 +435,19 @@ These scripts perform forward-time SLiM simulations to investigate how genomic d
 
 
 ## Simulation Scenarios
+
+The pipeline supports two scenarios: 
+1. Scenario 1: Additive (epis = 1.00) 
+2. Scenario 2: Epistasis (epis = 2.00)
+
+## Functions for running simulations and analysis of simulation results
+
+1. `initSlimSim()`: Function specifying the parameters for initializing the simulation and generating a temporary population file. The population file makes the subsequent simulations faster.
+2. `runSlimSim()`: Function specifying the parameters for running the simulation.
+3. `clean_data()` and `get_freq()`: Cleans the output from SLiM to get marker allele frequencies
+4. `newGetSimFreqs2()`: Runs the simulation the specified number of times (`numReps`) and processes the output to generate marker allele frequencies for only the amrkers present in the focal population. Returns a dataframe containing marker allele frequencies for all the populations.
+5. 
+
 
 -----
 
