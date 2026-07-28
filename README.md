@@ -184,7 +184,7 @@ The pipeline supports four evolutionary scenarios:
 `runSlimSim()` executes forward simulations to specified generations using SLiM.
 `getSimFreqs2()` parses simulation output and calculates allele frequencies across replicates.
 
-** These functions are common for all the SLiM simulation scenarios with minor changes in `getSimFreqs2()` based to the scenarios and chromosomes simulated.
+** These functions are common for all the SLiM simulations for directional cross scenarios, with minor changes in `getSimFreqs2()` based to the scenarios and chromosomes simulated.
 
 ## Output
 
