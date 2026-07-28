@@ -223,21 +223,7 @@ logit_sel<- function(df){
   return(logit_sample)
 }
 
-### Merge the result from the hypothesis testing ###
-
-find_pattern<- function( merge_df){
-  merge_df<- merge_df %>%group_by(run, case)
-  mutate(
-    pattern = paste(group_1, group_2, group_3, sep = "-")
-  )
-  merge_df<- merge_df%>%mutate(group=case_when(
-    pattern=="1-1-1" ~ 3,
-    pattern=="0-0-0" ~ 0,
-    pattern %in% c("1-0-0","0-1-0", "0-0-1") ~ 1,
-    pattern %in% c("1-1-0","0-1-1", "1-0-1") ~ 2,
-    TRUE ~ 4
-  ))
-}
+### Classifies the result from the hypothesis testing ###
 
 modify_result<- function(df, target){
   pred_df<- df%>%dplyr::select(pos, run, contrast, s_val, arch)%>%
