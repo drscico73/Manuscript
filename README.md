@@ -380,7 +380,9 @@ Significance across the three additive tests is combined using `find_pattern()` 
 |2/3|Significant deviations in two comparisons|
 |3/3|Significant deviations in all three comparisons|
 
+## Output Plots
 
+###
 
 -----
 
