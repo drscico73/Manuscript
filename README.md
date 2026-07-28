@@ -503,7 +503,7 @@ The output containing the following information:
 
 ## Scripts
 
-* `main_script_slim_dom.R``
+* `main_script_slim_dom.R`
 * `func_slim_analysis.R`
 * `func_visual_slim.R`
 * `one_chr.slim`
