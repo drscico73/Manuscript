@@ -499,7 +499,7 @@ The output containing the following information:
 * `sign`: Predicted architecture; 0- Additive and 1- Non-additive (epistatic)
 
 -----
-# 6. Epistasis Simulations: 3x2 Crosses
+# 7. Dominance Simulations: 3x2 Crosses
 
 ## Scripts
 
@@ -521,18 +521,7 @@ where *s_A* and *s_B* represent the selection response of the marker allele from
 
 ## Simulation Parameters
 
-|Parameter|Description|
-|------|------|
-|popSize|Population size|
-|numReps|Number of replicate simulations|
-|genomeSize|Size of the chromosome|
-|domCoefs|Dominance coefficients|
-|epis|Epistasis coefficient|
-|targetPos0|Vector containing the marker positions of line A and line B|
-|selCoefs|Vector containing the selection coefficients of markers of line A and line B|
-|focalGen|Generation to generate the output|
-|seed|Seed for the simulations|
-
+Described in **6. Epistasis Simulations: 3x2 crosses**
 
 ## Simulation Scenarios
 
