@@ -406,18 +406,31 @@ Combined genome-wide deviation estimates across all three comparisons.
 
 -----
 
-# 6. Single-Chromosome Epistasis Simulations: 3x2 Crosses
+# 6. Epistasis Simulations: 3x2 Crosses
 
 ## Scripts
 
 * `main_script_slim_one_chr.R`
+* `main_script_slim_two_chr.R`
 * `func_slim_analysis.R`
 * `func_visual_slim.R`
 * `one_chr.slim`
+* `two_chr.slim`
 
 ## Overview
 
-These scripts perform forward-time SLiM simulations to investigate how genomic distance can affect the effect of epistasis on the response to selection when both interacting targets are on the same chromosome but on different haplotypes. The simulation is described in ***one_chr.slim***. 
+These scripts perform forward-time SLiM simulations to investigate how genomic distance affects the contribution of epistasis to the response to selection. It tests this in two cases:
+1. When two interacting targets are located on the same chromosome but on different haplotypes. The simulation model is described in ***one_chr.slim***. The analysis is done using ***main_script_slim_one_chr.R***
+2. When two interacting targets are located on two different chromosomes. The simulation model is described in ***two_chr.slim***. The analysis is done using ***main_script_slim_two_chr.R***
+
+The pipeline tests the relationship:
+
+**s_A(AB) = s_A(AC) − s_B(BC)**
+
+where *s_A* and *s_B* represent the selection response of the marker allele from lines A and B, respectively. *AB*, *AC*, and *BC* represent crosses between lines A and B, lines A and C, and lines B and C, respectively. 
+
+To investigate the effect of genomic distance, the genomic position of target A is kept constant, while the position of target B is systematically varied across 400 different genomic positions. For each position of target B, the simulation is run and the relationship above is tested to assess how the genomic distance between the two interacting targets affects the ability to detect the epistatic contribution to the response to selection.
+
 
 ## Simulation Parameters
 
@@ -446,7 +459,30 @@ The pipeline supports two scenarios:
 2. `runSlimSim()`: Function specifying the parameters for running the simulation.
 3. `clean_data()` and `get_freq()`: Cleans the output from SLiM to get marker allele frequencies
 4. `newGetSimFreqs2()`: Runs the simulation the specified number of times (`numReps`) and processes the output to generate marker allele frequencies for only the amrkers present in the focal population. Returns a dataframe containing marker allele frequencies for all the populations.
-5. 
+5. `logit_freq()` and `logit_sample()`: Calculates the selection response as logit-transformed allele frequencies.
+6. `modify_result()`: Classifies deviations as significant(1) or insignificant (0).
+ 
+## Output Plots
+
+Both ***main_script_slim_one_chr.R*** and ***main_Script_slim_two_chr.R*** generate the following plots:
+
+### `p_dist_calc_add`
+
+The effect of the distance between two selected targets (X-axis) and the statistical significance of deviations between predicted and calculated logit-transformed allele frequencies (Y-axis) for additive architecture.
+
+### `p_dist_calc_int`
+
+The effect of the distance between two selected targets (X-axis) and the statistical significance of deviations between predicted and calculated logit-transformed allele frequencies (Y-axis) for epistatic architecture.
+
+### `s_dist_calc`
+
+The effect of the distance between the selection targets (or markers; X-axis) on the deviation between the expected and observed response to selection (Y-axis).
+
+### `roc_curve`
+
+The receiver-operating curve.
+
+-----
 
 
 -----
