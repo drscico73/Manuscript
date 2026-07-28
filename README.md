@@ -21,11 +21,11 @@ The workflows include:
 | `H0_Check.R`                | Single-chromosome SLiM simulations for directional crosses               |
 | `H0_Check2Chrom.R`          | Two-chromosome SLiM simulations for directional crosses                  |
 | `threshold_for_ttest.R`     | Empirical significance threshold estimation                              |
-| `func_exp_analysis.R`       | Functions for analysis of experimental data for 3x2 crosses              |
+| `func_ee_analysis.R`       | Functions for analysis of experimental evolution data for 3x2 crosses              |
 | `func_slim_analysis.R`      | Functions for analysis of SLiM simulations for 3x2 crosses               |
-| `func_visual_exp_data.R`    | Functions for visualization of experimental data for 3x2 crosses         |
+| `func_visual_ee_data.R`    | Functions for visualization of experimental evolution data for 3x2 crosses         |
 | `func_visual_slim.R`        | Functions for visualization of SLiM simulation data for 3x2 crosses      |
-| `main_script_exp_data.R`    | Main script for analysis of experimental data for 3x2 crosses            |
+| `main_script_ee_data.R`    | Main script for analysis of experimental evolution data for 3x2 crosses            |
 | `main_script_slim_dom.R`    | Main script for dominance simulations in 3x2 crosses                     |
 | `main_script_slim_one_chr.R`| Main script for single-chromosome SLiM simulations for 3x2 crosses       |
 | `main_script_two_chr.R`     | Main script for two-chromosome SLiM simulations for 3x2 crosses          |
@@ -287,9 +287,9 @@ The script generates:
 
 ## Scripts
 
-* `main_script_exp_data.R`
-* `func_exp_analysis.R`
-* `func_visual_exp_data.R`
+* `main_script_ee_data.R`: Main script for analysis of experimental evolution data
+* `func_ee_analysis.R`: Functions for analysis of experimental evolution data
+* `func_visual_ee_data.R`: Functions for visualization of experimental evolution data
 
 ## Overview
 
@@ -382,7 +382,41 @@ Significance across the three additive tests is combined using `find_pattern()` 
 
 ## Output Plots
 
-###
+### `af_comp`
+
+Combined allele-frequency trajectories across genomic positions and chromosomes for the three pairwise comparisons.
+
+### `plot_so_exp_obs`
+
+Expected vs Observed selection response in SO-OS.
+
+### `plot_class_res_10`
+
+Genome-wide visualization of deviations from additive expectations, showing calculated versus expected logit allele-frequency differences and genomic regions classified according to the number of significant tests.
+
+## Main Output Objects
+
+### `merge_df_10`
+
+Combined significance classifications across all three comparisons.
+
+### `merge_dev_10`
+
+Combined genome-wide deviation estimates across all three comparisons.
+
+-----
+
+# 6. Single-Chromosome Epistasis Simulations: 3x2 Crosses
+
+## Scripts
+
+* `main_script_slim_one_chr.R`
+* `func_slim_analysis.R`
+* `func_visual_slim.R`
+* `one_chr.slim`
+
+## Overview
+
 
 -----
 
