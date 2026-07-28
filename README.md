@@ -117,7 +117,7 @@ Required data fields include:
 * `sample` The Cross direction - SO/OS
 * `Dmel_OregonR_non-inbred` Oregon allele frequency
 
-## Selection Response Calculation
+## Selection Strength Calculation
 
 ```r
 s = (logit(F10) - logit(F1)) / 10
@@ -188,12 +188,12 @@ The pipeline supports four evolutionary scenarios:
 
 ## Output
 
-The simulations generate:
+### summary_s
+The compilation of the selection response summaries for each scenario
 
-* Selection response summaries
-* Plots depicting the distance-dependent response
-
-Simulation outputs are written as tab-delimited files.
+### combined_plot
+The combined plot depicting the distance-dependent responses for each scenario
+plots need to be generated for each scenario separately before combining
 
 ---
 
@@ -229,10 +229,12 @@ The script can be used to compare:
 
 
 ## Output
-The script generates:
-* Boxplots of selection response (`s`)
-* Statistical comparisons between populations
-* Additive vs. epistatic scenario comparisons
+
+### all_results
+The tab-delimited file containing the simulation results
+
+### p2a & p2e
+Boxplots of selection strength (`s`) for additive vs. epistatic scenario comparisons
 
 ---
 
@@ -274,9 +276,8 @@ Chromosome-specific cutoffs are also calculated separately.
 
 ## Output
 
-The script generates:
-
-* genome-wide p-value distributions,
+###
+genome-wide p-value distributions,
 * empirical p-value histograms,
 * significance threshold estimates.
 
