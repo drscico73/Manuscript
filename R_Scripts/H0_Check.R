@@ -269,7 +269,7 @@ summary_s <- all_results %>%
     .groups = "drop"
     )
                           
-# plotting the results - one plot for each simulation scenario
+# plotting the results - Create one plot for each simulation scenario separately
 ggplot(subset(summary_s, Target=="Target 1"), aes(x = distance_mb, y = mean_s, color = Cross, 
                       group = interaction(Target, Cross))) +
   geom_line(size = 1) + 
