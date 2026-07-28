@@ -436,15 +436,15 @@ To investigate the effect of genomic distance, the genomic position of target A 
 
 |Parameter|Description|
 |------|------|
-|popSize|Population size|
-|numReps|Number of replicate simulations|
-|genomeSize|Size of the chromosome|
-|domCoefs|Dominance coefficients|
-|epis|Epistasis coefficient|
-|targetPos0|Vector containing the marker positions of line A and line B|
-|selCoefs|Vector containing the selection coefficients of markers of line A and line B|
-|focalGen|Generation to generate the output|
-|seed|Seed for the simulations|
+|`popSize` |Population size|
+|`numReps` |Number of replicate simulations|
+|`genomeSize` |Size of the chromosome|
+|`domCoefs` |Dominance coefficients|
+|`epis` |Epistasis coefficient|
+|`targetPos0` |Vector containing the marker positions of line A and line B|
+|`selCoefs` |Vector containing the selection coefficients of markers of line A and line B|
+|`focalGen` |Generation to generate the output|
+|`seed` |Seed for the simulations|
 
 
 ## Simulation Scenarios
