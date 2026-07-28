@@ -108,7 +108,7 @@ compute_p<- function(data_merge,  data_sample, ref){
       tibble(p_value = p, contrast = contrast_value, s_val=s)
     })
   
-  #Multiple testing coreection using Benjamini-Hochberg
+  #Multiple testing correction using Benjamini-Hochberg
   model_offset <- model_offset %>%
     ungroup() %>%
     mutate(adj_P = p.adjust(p_value, method = "BH"))
