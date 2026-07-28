@@ -541,12 +541,7 @@ The pipeline supports 9 scenarios:
 
 ## Functions for running simulations and analysis of simulation results
 
-1. `initSlimSim()`: Function specifying the parameters for initializing the simulation and generating a temporary population file. The population file makes the subsequent simulations faster.
-2. `runSlimSim()`: Function specifying the parameters for running the simulation.
-3. `clean_data()` and `get_freq()`: Cleans the output from SLiM to get marker allele frequencies
-4. `newGetSimFreqs2()`: Runs the simulation the specified number of times (`numReps`) and processes the output to generate marker allele frequencies for only the amrkers present in the focal population. Returns a dataframe containing marker allele frequencies for all the populations.
-5. `logit_freq()` and `logit_sample()`: Calculates the selection response as logit-transformed allele frequencies.
-6. `modify_result()`: Classifies deviations as significant(1) or insignificant (0).
+Described in **6. Epistasis Simulations: 3x2 crosses**
  
 ## Output Data
 
