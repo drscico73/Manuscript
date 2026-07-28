@@ -50,6 +50,48 @@ plot_af_gen<- function(df_wide, line){
   return(p)
 }
 
+### Plotting expected vs observed selection response for one cross
+
+plot_exp_obs_s<- function(sel_ho_10, sel_hs_10, sel_so_10, data_ho){
+mean_sel_ho<- sel_ho_10%>%
+  group_by(mpos, chr)%>%
+  summarise_at(vars(ore_s_ho), list(ore_s=mean))
+mean_sel_hs<- sel_hs_10%>%
+  group_by(mpos, chr)%>%
+  summarise_at(vars(sam_s_hs), list(sam_s=mean))
+mean_sel_so<- sel_so_10%>%
+  group_by(mpos, chr)%>%
+  summarise_at(vars(ore_s_so), list(obs=mean))
+exp_vs_obs_10<- merge(mean_sel_ho, mean_sel_hs, by=c("mpos", "chr"))
+exp_vs_obs_10$exp<- exp_vs_obs_10$ore_s - exp_vs_obs_10$sam_s
+exp_vs_obs_10<- merge(exp_vs_obs_10, mean_sel_so, by=c("mpos", "chr"))
+exp_vs_obs_10<- merge(exp_vs_obs_10, win_af%>%dplyr::rename("mpos"=pos)%>%
+                        select(c("mpos", "chr", "window"))%>%distinct(),by=c("mpos", "chr") )
+exp_vs_obs_10<- exp_vs_obs_10%>%select(c("chr", "window", "mpos", "exp", "obs"))
+
+df<- exp_vs_obs_10%>%pivot_longer(cols=c("obs", "exp"), 
+                            names_to = "line", values_to = "s")
+custom_colors <- c("exp" = "orange", "obs" = "green4")
+df$color_group <- with(df, ifelse(line == "exp", "exp","obs"))
+df$chr <- factor(df$chr, levels = c("X", sort(unique(df$chr[df$chr != "X"]))))
+p <- ggplot(df, aes(x = mpos, y = s, color = line)) +
+  geom_line(linewidth=1.5)+
+  labs(x = "Position (Mb)",
+       y = "Logit AF",
+       color = "") +
+  scale_color_manual(values = custom_colors, labels=c("obs"="Observed", 
+                                                      "exp"="Predicted")) +
+  facet_wrap( ~ chr, scales = "free_x", ncol=5) +
+  theme(legend.title = element_text(size = 14, face = "bold"),
+        legend.text = element_text(size = 12, face="bold"),
+        legend.key.size = unit(1.5, "cm"),
+        legend.position = "bottom") +
+  scale_x_continuous(labels = scales::label_number(scale = 1/1e6)) 
+return(p)
+}
+
+
+
 ### Plotting the predicted architecture along the genome ###
 
 plot_class<- function(df1, df2, gen_beg, gen_end){
