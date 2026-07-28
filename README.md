@@ -110,7 +110,7 @@ This script processes pooled sequencing allele frequency data from the direction
 df <- readRDS("/Path/to/file/AlleleFreq.rds")
 ```
 
-Required data:
+Required data fields include:
 
 * `chr` Chromosome
 * `pos` Positions (Mean position of the window)
