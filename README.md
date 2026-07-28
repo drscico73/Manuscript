@@ -293,6 +293,95 @@ The script generates:
 
 ## Overview
 
+These scripts process pooled sequencing allele frequency data from 3x2 crosses to:
+
+* Clean and restructure sample metadata
+* Average allele-frequency estimates obtained from two independent marker sets
+* Calculate logit-transformed allele frequencies as a measure of selection response
+* Estimate deviations from additive expectations
+* Perform genome-wide statistical test for deviations from additivity
+* Correct for multiple testing using Benjamini-Hochberg procedure
+* Classify genomic regions according to number of significant deviations
+* Generate publication-quality figures
+
+## Required Inputs
+
+Six RDS files containing window-level allele-frequency estimates:
+
+* hel_ho_out_500.rds
+* ore_ho_out_500.rds
+* hel_hs_out_500.rds
+* sam_hs_out_500.rds
+* ore_so_out_500.rds
+* sam_so_out_500.rds
+
+Required data fields include:
+
+* `chr` Chromosome
+* `win` Genomic window coordinates
+* `sample` Sample/cross identity and experimental metadata
+* `gen` Generation
+* `rep` Replicate
+*  Allele-frequency estimates for the corresponding parental/reference lines
+
+## Data Processing
+
+`process_data()`:
+
+* Removes reference samples
+* Parses sample, generation, and replicate information
+* Standardizes sample and allele-frequency column names
+* Calculates the midpoint `mpos` of each genomic window
+
+For each pairwise comparison, allele frequencies estimated from two independent marker sets are averaged.
+
+## Selection Response Calculation
+
+Selection response is calculated with `logit_freq()` as the log ratio of allele frequencies: 
+
+s= log(AF_A/AF_B)
+
+## Additive Expectation and Deviation and Statistical Testing
+
+`compute_p()`:
+
+* Tests three additive expectations
+* Correct for multiple testing
+* Classify windows as significantly deviating (1) or not significantly deviating (0) from additive expectations
+* Calculates deviation from additive expectations
+
+Genome-wide statistical tests are performed independently for each genomic window using linear models: 
+
+lm( s ~ group, data = .)
+
+`emmeans` is used to estimate the expected contrast, which is compared with the observed selection response of the focal population.
+
+FDR is estimated using the ***Benjamini-Hochberg*** method. Genomic windows with ***Adjusted P ≤ 0.05*** are classified as a significant deviation from additivity. 
+
+The three additive expectations tested are: 
+
+H(HO-OH) - S(SO-OS) = H(HS-SH) 
+
+O(SO-OS) - H(HS-SH) = H(HO-OH) 
+
+S(HS-SH) - O(HO-OH) = S(SO-OS)
+
+The deviation from the additive expectation is calculated as: ***Deviation = Observed response - Expected response***
+ 
+
+## Genomic Classification
+
+Significance across the three additive tests is combined using `find_pattern()` to classify each window: 
+
+|Classification|Description|
+|------|-------
+|0/3|No significant deviations comparisons|
+|1/3|Significant deviations in one comparison|
+|2/3|Significant deviations in two comparisons|
+|3/3|Significant deviations in all three comparisons|
+
+
+
 -----
 
 # General Notes
