@@ -43,6 +43,37 @@ runSlimSim <- function(targetPos1, selCoefs, popFile, seed, maxGen, writeOutput,
   system(slimCmdLine, intern = TRUE)
 }
 
+### Clean the raw data obtained from slim to retain only the relevant information: mutation frequencies in each population###
+
+clean_data<- function(df, mut_start, ind_start, hap_start){
+  cleaned_df<- df[(mut_start + 1):(hap_start - 1)] %>%
+    as.data.frame() %>%
+    dplyr::rename("line" = '.') %>%
+    separate_wider_delim(cols="line",
+                         delim = " ",
+                         names = c("mut_id", "unk1", "mut_type", "pos", "selCoeff", "domCoeff",
+                                   "pop", "extra", "count"),
+                         too_many= "merge",
+                         too_few = "align_start",
+                         cols_remove = TRUE
+    ) %>%
+    filter(!is.na(mut_id) & mut_id != "Mutations:")%>%
+    dplyr::mutate(across(count,as.integer), across(pos,as.integer), 
+                  across(unk1, as.integer),across(selCoeff,as.numeric))%>%
+    mutate(freq=count/2500)
+  return(cleaned_df)
+}
+
+### Calculate marker AF ###
+
+get_freq<- function(df_lines){
+  mut_start <- grep("^Mutations:", df_lines)
+  ind_start <- grep("^Individuals:", df_lines)
+  hap_start <- grep("^Haplosomes:", df_lines)
+  
+  new_df <- clean_data(df_lines, mut_start, ind_start, hap_start)
+}
+
 ### Get frequencies ###
 
 newGetSimFreqs2 <- function(slimCmd, slimScript) {
@@ -141,37 +172,6 @@ newGetSimFreqs2 <- function(slimCmd, slimScript) {
     # Return combined results
     return(df_sample)
   }
-}
-
-### Clean the raw data obtained from slim to retain only the relevant information: mutation frequencies in each population###
-
-clean_data<- function(df, mut_start, ind_start, hap_start){
-  cleaned_df<- df[(mut_start + 1):(hap_start - 1)] %>%
-    as.data.frame() %>%
-    dplyr::rename("line" = '.') %>%
-    separate_wider_delim(cols="line",
-                         delim = " ",
-                         names = c("mut_id", "unk1", "mut_type", "pos", "selCoeff", "domCoeff",
-                                   "pop", "extra", "count"),
-                         too_many= "merge",
-                         too_few = "align_start",
-                         cols_remove = TRUE
-    ) %>%
-    filter(!is.na(mut_id) & mut_id != "Mutations:")%>%
-    dplyr::mutate(across(count,as.integer), across(pos,as.integer), 
-                  across(unk1, as.integer),across(selCoeff,as.numeric))%>%
-    mutate(freq=count/2500)
-  return(cleaned_df)
-}
-
-### Calculate marker AF ###
-
-get_freq<- function(df_lines){
-  mut_start <- grep("^Mutations:", df_lines)
-  ind_start <- grep("^Individuals:", df_lines)
-  hap_start <- grep("^Haplosomes:", df_lines)
-  
-  new_df <- clean_data(df_lines, mut_start, ind_start, hap_start)
 }
 
 ### Calculating logit-transformed AF ###
