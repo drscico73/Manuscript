@@ -188,10 +188,10 @@ The pipeline supports four evolutionary scenarios:
 
 ## Output
 
-### summary_s
+### `summary_s`
 The compilation of the selection response summaries for each scenario
 
-### combined_plot
+### `combined_plot`
 The combined plot depicting the distance-dependent responses for each scenario
 plots need to be generated for each scenario separately before combining
 
@@ -230,10 +230,10 @@ The script can be used to compare:
 
 ## Output
 
-### all_results
+### `all_results`
 The tab-delimited file containing the simulation results
 
-### p2a & p2e
+### `p2a` & `p2e`
 Boxplots of selection strength (`s`) for additive vs. epistatic scenario comparisons
 
 ---
@@ -276,10 +276,18 @@ Chromosome-specific cutoffs are also calculated separately.
 
 ## Output
 
-###
-genome-wide p-value distributions,
-* empirical p-value histograms,
-* significance threshold estimates.
+### `p1`
+genome-wide p-value distributions
+
+### `cutoff_all`
+significance threshold estimate for combined p-values genome wide
+
+### `cutoff_chrom`
+Chromosome wise significance threshold estimates
+  
+### p2
+Histogram of all the p-values with the cutoff value `cutoff_all`
+
 
 
 -----
