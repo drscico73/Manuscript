@@ -417,6 +417,24 @@ Combined genome-wide deviation estimates across all three comparisons.
 
 ## Overview
 
+These scripts perform forward-time SLiM simulations to investigate how genomic distance can affect the effect that epistasis can have on the response to selection when both the interacting targets are on the same chromosome but different haplotypes.. The simulation is described in one_chr.slim. 
+
+## Simulation Parameters
+
+|Parameter|Description|
+|------|------|
+|popSize|Population size|
+|numReps|Number of replicate simulations|
+|genomeSize|Size of the chromosome|
+|domCoefs|Dominance coefficients|
+|epis|Epistasis coefficient|
+|targetPos0|Vector containing the marker positions of line A and line B|
+|selCoefs|Vector containing the selection coefficients of markers of line A and line B|
+|focalGen|Generation to generate the output|
+|seed|Seed for the simulations|
+
+
+## Simulation Scenarios
 
 -----
 
