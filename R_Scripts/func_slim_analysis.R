@@ -249,6 +249,45 @@ logit_sel<- function(df){
   return(logit_sample)
 }
 
+### Hypothesis testing ###
+
+compute_p<- function(data_merge,  data_cross, ref){
+  data_merge<- data_merge%>% dplyr::select(c("pos", "group", "run","rep", "s", "arch"))
+  #data_merge$pos<- as.factor(data_merge$pos)
+  data_merge$rep<- as.factor(data_merge$rep)
+  data_merge$arch<- as.factor(data_merge$arch)
+  data_merge<-data_merge%>%mutate(group = fct_relevel(group, ref)) 
+  if(ncol(data_cross)>4){
+    data_cross<- data_cross%>% dplyr::select(c("pos", "group", "run","rep", "s", "arch"))
+    data_cross<- data_cross %>% 
+      group_by(pos, run, arch) %>%
+      summarise(val = mean(s, na.rm = TRUE))%>%dplyr::rename("s"=val)}
+  model_offset<- data_merge%>% group_by(pos, run, arch)%>%
+    do({
+      model <- lm(s ~ group, data = .)
+      s<- data_cross$s[data_cross$pos == unique(.$pos)& data_cross$run == unique(.$run)&data_cross$arch==unique(.$arch)]
+      em <- emmeans(model, pairwise ~ group)
+      a<-test(em,null=(1*s))
+      contrast_df <- as.data.frame(em$contrasts)
+      p<- as.numeric(a[["contrasts"]][7])
+      contrast_value <- contrast_df$estimate[1]
+      tibble(p_value = p, contrast = contrast_value, s_val=s)
+    })
+  merge_df <- model_offset %>%
+    ungroup() %>%
+    mutate(adj_P = p.adjust(p_value, method = "BH"))
+  merge_df$group<- NA
+  merge_df <- merge_df %>%
+    mutate(
+      group = case_when(
+        adj_P <= 0.05 ~ 1,
+        adj_P >=0.05 ~ 0,
+        TRUE ~ 2
+      )
+    )
+  return(merge_df)
+}
+
 ### Classifies the result from the hypothesis testing ###
 
 modify_result<- function(df, target){
