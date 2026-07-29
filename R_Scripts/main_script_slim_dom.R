@@ -20,7 +20,6 @@ source("path_to_directory/func_visual_slim.R")
 registerDoParallel(cores = parallel::detectCores())
 outFileRds <- "path_to_output_directory/out_slim.rds"
 numCores <- 12L
-numReps <- 100L 
 slimCmd <- "/usr/local/bin/slim"
 slimScript <- "path_to_slim_script/one_chr.slim"
 popSize <- 1250L
