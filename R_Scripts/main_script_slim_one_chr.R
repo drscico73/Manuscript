@@ -130,5 +130,26 @@ print(p_dist_calc_int)
 s_dist_calc<- plot_diff_dist(pred_vs_obs_calc,"Calculated")
 print(s_dist_calc)
 
+model_perf_df <- result_test_1 %>%
+  mutate(
+    score = case_when(
+      arch=="add"~ -log10(adj_P),
+      arch=="non-add"~ -log10(adj_P),
+      .default=NA
+    )
+  )%>%
+  mutate(
+    arch = case_when(
+      arch=="add"~ 0,
+      arch=="non-add"~ 1,
+      .default=NA
+    ))
+roc_obj<- roc(model_perf_df$arch, model_perf_df$score)
+auc<- round(auc(model_perf_df$arch, model_perf_df$score),4)
+roc_df<- data.frame(tpp=roc_obj$sensitivities,
+                    fpp=(1-roc_obj$specificities),
+                    threshold=10^(-1*roc_obj$thresholds))
+
+roc_df$j_val<- roc_df$tpp+(1-roc_df$fpp)-1
 roc_curve<- plot_roc(roc_df, 0.05)
 print(roc_curve)
