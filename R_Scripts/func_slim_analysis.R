@@ -164,20 +164,20 @@ newGetSimFreqs2 <- function(slimCmd, slimScript) {
     #Identify the source line for mutation in the population
 
     sample1<- results%>%filter(pop=="p1")
-    sample1<- sample1%>%mutate(line=ifelse(pos %in% marker1 & mut_type!="m1", "1", 
-                                           ifelse(pos %in% marker2 & mut_type!="m1", "2", 
-                                                  ifelse(pos %in% marker2 & mut_type=="m1","1",
-                                                         ifelse(pos %in% marker1 & mut_type=="m1", "2",NA)))))
+    sample1<- sample1%>%mutate(line=ifelse(pos %in% marker1 & mut_type!="m1", "A", 
+                                           ifelse(pos %in% marker2 & mut_type!="m1", "B", 
+                                                  ifelse(pos %in% marker2 & mut_type=="m1","A",
+                                                         ifelse(pos %in% marker1 & mut_type=="m1", "B",NA)))))
     sample2<- results%>%filter(pop=="p2")
-    sample2<- sample2%>%mutate(line=ifelse(pos %in% marker2 & mut_type=="m1", "1", 
-                                           ifelse(pos %in% marker1 & mut_type=="m2", "1", 
-                                                  ifelse(pos %in% marker1 & mut_type=="m4","3",
-                                                         ifelse(pos %in% marker2 & mut_type=="m4", "3",NA)))))
+    sample2<- sample2%>%mutate(line=ifelse(pos %in% marker2 & mut_type=="m1", "A", 
+                                           ifelse(pos %in% marker1 & mut_type=="m2", "A", 
+                                                  ifelse(pos %in% marker1 & mut_type=="m4","C",
+                                                         ifelse(pos %in% marker2 & mut_type=="m4", "C",NA)))))
     sample3<-results%>%filter(pop=="p3")
-    sample3<- sample3%>%mutate(line=ifelse(pos %in% marker2 & mut_type=="m3", "2", 
-                                           ifelse(pos %in% marker1 & mut_type=="m1", "2", 
-                                                  ifelse(pos %in% marker1 & mut_type=="m4","3",
-                                                         ifelse(pos %in% marker2 & mut_type=="m4", "3",NA)))))
+    sample3<- sample3%>%mutate(line=ifelse(pos %in% marker2 & mut_type=="m3", "B", 
+                                           ifelse(pos %in% marker1 & mut_type=="m1", "B", 
+                                                  ifelse(pos %in% marker1 & mut_type=="m4","C",
+                                                         ifelse(pos %in% marker2 & mut_type=="m4", "C",NA)))))
     
     sample1_avg <- sample1 %>%
       group_by(pos,pop, rep, line) %>%
