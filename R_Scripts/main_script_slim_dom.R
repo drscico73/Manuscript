@@ -43,7 +43,7 @@ sel_df_dom_codom<- list()
 sel_df_codom_codom<- list()
 sel_df_rec_codom<- list()
 sel_df_codom_rec<- list()
-target_info<- data.frame(matrix(ncol=5, nrow=100))
+target_info<- data.frame(matrix(ncol=5, nrow=400))
 
 getSimFreqs2 <- newGetSimFreqs2(slimCmd, slimScript)
 genomeSize <- 32079331
@@ -57,7 +57,7 @@ selCoefs<- c(selCoefs_1, selCoefs_2)
 epis = 1.00
 
 ### Run the simulation for 400 different positions of marker 2 ###
-for(i in 1:100){
+for(i in 1:400){
   
   set.seed(base_seed+i)
   target_2 <- sample(allowed_2, 1, replace = F)
