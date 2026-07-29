@@ -22,7 +22,7 @@ source("path_to_directory/func_visual_slim.R")
 registerDoParallel(cores = parallel::detectCores())
 outFileRds <- "path_to_output_directory/out_slim.rds"
 numCores <- 12L
-numReps <- 100L 
+numReps <- 5L 
 slimCmd <- "/usr/local/bin/slim"
 slimScript <- "path_to_slim_script/one_chr.slim"
 popSize <- 1250L
@@ -58,14 +58,14 @@ for(i in 1:400){
     targetPos = targetPos, selCoefs = selCoefs,
     popSize = popSize, initFreq = 0.5,
     epis = 1.0, domCoefs = domCoefs,
-    seedBase = (base_seed+i), numReps = 5L, run=i
+    seedBase = (base_seed+i), numReps = numReps, run=i
   )
   af_df_int[[i]]<-getSimFreqs2(
     atPos = targetPos, atGen = 11L,
     targetPos = targetPos, selCoefs = selCoefs,
     popSize = popSize, initFreq = 0.5,
     epis = epis, domCoefs = domCoefs,
-    seedBase = (base_seed+i), numReps = 5L, run=i
+    seedBase = (base_seed+i), numReps = numReps, run=i
   )
   sel_df_add[[i]]<- logit_sel(af_df_add[[i]])
   sel_df_int[[i]]<- logit_sel(af_df_int[[i]])
