@@ -1,3 +1,29 @@
+### Helper functions ###
+
+# variable transformations
+transForth <- function(p) {
+  # like logit, but from (-0.1, 0.1)
+  p <- (2 * p + 1) / 2
+  ifelse(p < 0.5, log(p / (1 - p)), -log((1 / p) - 1))
+}
+backTrans <- function(z) {
+  # like expit, but into (-0.1, 0.1)
+  p <- ifelse(z >= 0, 1 / (1 + exp(-z)), exp(z) / (1 + exp(z)))
+  (2 * p - 1) / 2
+}
+asStr <- function(x) {
+  if (is.numeric(x)) {
+    if (length(x) > 1) {
+      paste0("'c(", paste(x, collapse = ","), ")'")
+    } else {
+      as.character(x)
+    }
+  } else {
+    paste0('"\'', x, '\'"')
+  }
+}
+
+
 ### Make a population file which will be used to initialise the populations in each iteration ###
 
 initSlimSim <- function(targetPos1, selCoefs, popFile, popSize, initFreq, epis, domCoefs, seed, slimCmd, slimScript) {
