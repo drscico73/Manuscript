@@ -242,11 +242,11 @@ sel_sample3<- all_runs_sel%>%filter(group=="p3")
 
 ### Hypothesis testing: s_1(AB)=s_1(AC)-s_1(BC) ###
 
-test1_lhs<- sel_sample2%>%dplyr::filter(line=="1")
-test1_rhs<- sel_sample3%>%dplyr::filter(line=="2")
+test1_lhs<- sel_sample2%>%dplyr::filter(line=="A")
+test1_rhs<- sel_sample3%>%dplyr::filter(line=="B")
 data_pred_1<- rbind(test1_lhs, test1_rhs)
 data_pred_1<- data_pred_1%>%dplyr::filter(pos %in% unique(df_target_1$pos))
-data_obs_1<- sel_sample1%>%dplyr::filter(line=="1")
+data_obs_1<- sel_sample1%>%dplyr::filter(line=="A")
 data_obs_1<- data_obs_1%>%dplyr::filter(pos %in% unique(df_target_1$pos))
 result_test_1<-compute_p(data_pred_1, data_obs_1, "p2")
 data_obs_1<- data_obs_1 %>%
