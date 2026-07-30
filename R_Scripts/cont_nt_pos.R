@@ -1,23 +1,11 @@
-#IN USE
-#MAKE SOEM CHANGES
-####making continuous windows of nucelotide positions using ore SNP information.
-#To be Edited: 02.09.25
-library(dplyr)
-library(tidyr)
-a<- readRDS("~/Desktop/manuscript_files/out_600.rds")
-# Make sure start and end are numeric
-win_ore <- a[,"window"] %>%
-  distinct()
-win_ore$old_win<- win_ore$window
-win_ore<- win_ore%>%
-  separate_wider_delim(window, ":", names = c("chr", "win")) %>%
-  separate_wider_delim(win, "-", names = c("start", "end")) %>%
-  mutate(across(c(start, end), as.numeric))
+### Loading libraries and data ###
+#out_500 was generated using haploFreq.R
+#Syntax: 
 
-# Initialize new columns
-win_ore$new_start <- NA_integer_
-win_ore$new_end <- NA_integer_
+library(tidyverse)
+win_det<- readRDS("path_to_directory/out_500.rds")
 
+### Function description ###
 adjust_windows <- function(df_chr) {
   residual <- 0  # Reset for each chromosome
   for (i in 1:nrow(df_chr)) {
@@ -48,6 +36,21 @@ adjust_windows <- function(df_chr) {
   return(df_chr)
 }
 
+### Making windows continuous ###
+
+# Make sure start and end are numeric
+win_ore <- win_det[,"window"] %>%
+  distinct()
+win_ore$old_win<- win_ore$window
+win_ore<- win_ore%>%
+  separate_wider_delim(window, ":", names = c("chr", "win")) %>%
+  separate_wider_delim(win, "-", names = c("start", "end")) %>%
+  mutate(across(c(start, end), as.numeric))
+
+# Initialize new columns
+win_ore$new_start <- NA_integer_
+win_ore$new_end <- NA_integer_
+
 # Apply to each chromosome
 win_ore_updated <- win_ore %>%
   group_split(chr) %>%
@@ -55,11 +58,6 @@ win_ore_updated <- win_ore %>%
 win_ore<- win_ore_updated
 win_ore$new_win<- paste(win_ore$chr, win_ore$new_start, sep=":")
 win_ore$new_win<- paste(win_ore$new_win, win_ore$new_end, sep="-")
-saveRDS(win_ore, file="~/Desktop/manuscript_files/window_details.rds")
-a_updated <- a %>%
-  left_join(win_ore %>% dplyr::select(old_win, new_win), by = c("window" = "old_win"))%>%as.data.frame()
-a_updated <- a_updated %>%
-  dplyr::select(-window) %>%
-  rename(window = new_win)
-a_new<- a_updated[,c(1, ncol(a_updated), 2: (ncol(a_updated)-1))]
-saveRDS(a_new, "~/Desktop/Projects/new_SOH/data_window_analysis/win_ore.rds")
+
+### Saving window coordinates ###
+saveRDS(win_ore, file="path_to_directory/window_details.rds")
