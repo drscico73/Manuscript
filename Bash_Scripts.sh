@@ -1,15 +1,15 @@
 #!/bin/bash
 
 ### Variant Calling on mapped sequence files (.cram) ###
-cram_dir=”path_to_cram_directory”
-bcf_dir=”path_to_bcf_directory”
-pileup_script=”path_to_pileup.sh”
-genome=”path_to_genome.fa.gz”
+cram_dir="path_to_cram_directory"
+bcf_dir="path_to_bcf_directory"
+pileup_script="path_to_pileup.sh"
+genome="path_to_genome.fa.gz"
 
-for file in “$cram_dir”/*.cram; do
-	echo “Processing $file …”
+for file in "$cram_dir"/*.cram; do
+	echo "Processing $file …"
 		base_name=$(basename “$file” .cram)
-		out_file=”$bcf_dir/${base_name}.bcf”
+		out_file="$bcf_dir/${base_name}.bcf"
 		"$pileup_script" -f "$genome" -Ob "$file" > "$out_file"
 done
 
