@@ -8,7 +8,7 @@ genome="path_to_genome.fa.gz"
 
 for file in "$cram_dir"/*.cram; do
 	echo "Processing $file …"
-		base_name=$(basename “$file” .cram)
+		base_name=$(basename "$file" .cram)
 		out_file="$bcf_dir/${base_name}.bcf"
 		"$pileup_script" -f "$genome" -Ob "$file" > "$out_file"
 done
