@@ -47,7 +47,9 @@ bcftools view -S marker_samp.txt -Oz -o marker_flt.vcf.gz mpileup_flt.vcf.gz
 
 ### Filter for markers ###
 
-# Preparing marker files
+# Preparing marker information files
+	# Marker information files can be generated using Process_mark.R. Each inbred line will have its own separate file
+	#You would need the VCF file containing all the inbred lines (marker_flt.vcf.gz)
 awk 'NR > 1 {printf $1":"$2":"$3":"$4}' ore_marker_file.txt|sort -u > ore_marker_ids.txt
 awk 'NR > 1 {printf $1":"$2":"$3":"$4}' sam_marker_file.txt|sort -u > sam_marker_ids.txt
 awk 'NR > 1 {printf $1":"$2":"$3":"$4}' hel_marker_file.txt|sort -u > hel_marker_ids.txt
