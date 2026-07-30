@@ -4,7 +4,7 @@ library(stringr)
 library(vcfR)
 
 ### Reading the Merged Markers vcf file ###
-a<- read.vcfR("path_to_marker_file/markers.vcf.gz")
+a<- read.vcfR("path_to_marker_file/marker_flt.vcf.gz")
 sample_calc<- cbind(a@fix,a@gt)
 sample_calc<- as.data.frame(sample_calc)
 sample_calc<- distinct(sample_calc)
