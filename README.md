@@ -97,209 +97,7 @@ fuzzyjoin
 * Softwares mentioned in [SNP calling pipline](https://zenodo.org/records/21506978).
 
 ---
-
-# 1. Allele Frequency and Selection Strength Analysis for Directional Crosses
-
-## Script
-
-`AFnS_plots.R`
-
-## Overview
-
-This script processes pooled sequencing allele frequency data from the directional crosses to:
-
-* Clean and restructure sample metadata
-* Calculate logit-transformed allele frequencies
-* Estimate selection response between generations (F1 → F10)
-* Perform genome-wide statistical comparisons between populations
-* Generate publication-quality figures
-
-## Required Input
-
-```r
-df <- readRDS("/Path/to/file/AlleleFreq.rds")
-```
-
-Required data fields include:
-
-* `chr` Chromosome
-* `pos` Positions (Mean position of the window)
-* `sample` The Cross direction - SO/OS
-* `Dmel_OregonR_non-inbred` Oregon allele frequency
-
-## Selection Strength Calculation
-
-```r
-s = (logit(F10) - logit(F1)) / 10
-```
-
-## Statistical Testing
-
-Genome-wide t-tests compare selection responses between populations (`Cross`) at each genomic position.
-
-Significance thresholds are determined using simulations from:
-
-```bash
-threshold_for_ttest.R
-```
-
-## Output Plots
-### `p1`
-Allele frequency trajectories across genomic positions.
-### `p2`
-Selection response (`s`) across chromosomes.
-### `p3`
-Genome-wide significance plot showing statistically significant loci.
-
-------
-
-# 2. Single-Chromosome SLiM Simulations: Directional Crosses
-
-## Scripts
-
-* `H0_Check.R`
-* `H0_Check.slim`
-
-## Overview
-
-These scripts perform forward-time SLiM simulations using SLiM to investigate how linkage distance, haplotype structure, and epistasis influence allele frequency change and selection response of two alleles associated with same chromsome (Specifically X) over time. The simulation configurations are controlled within the included SLiM script `H0_Check.slim`
-
-## Simulation Parameters
-
-| Parameter      | Description                     |
-| -------------- | ------------------------------- |
-| `popSize`      | Population size                 |
-| `numReps`      | Number of replicate simulations |
-| `target1`      | Reference selected locus        |
-| `distances_mb` | Distance between selected loci  |
-| `selCoefs`     | Selection coefficients          |
-| `epis`         | Epistasis coefficient           |
-| `domCoefs`     | Dominance coefficient           |
-
-## Simulation Scenarios
-
-The pipeline supports four evolutionary scenarios:
-
-| Scenario | Epistasis                        | Haplotype Structure  | Required Modifications in SLiM script |
-| -------- | -------------------------------- | -------------------- | --------------------------------------|
-| I        | Epistatic         | Same haplotype       | Comment out the chunk from line `111 to 116` and use the chunk from line `120 to 125` of the SLiM script, set (`epis = 2.00`) | 
-| II       | Neutral/Additive  | Same haplotype       | Comment out the chunk from line `111 to 116` and use the chunk from line `120 to 125` of the SLiM script, set (`epis = 1.00`) |
-| III      | Epistatic     | Different haplotypes | Comment out the chunk from line `120 to 125` and use the chunk from line `111 to 116` of the SLiM script, set  (`epis = 2.00`)     |
-| IV       | Neutral/Additive  | Different haplotypes | Comment out the chunk from line `120 to 125` and use the chunk from line `111 to 116` of the SLiM script, set (`epis = 1.00`) |
-
-* The script needs to be run 4 times, once for each scenario by making necessary changes to the SLiM and/or R-script
-  
-## Important functions 
-`initSlimSim()` creates an initial population state and writes a temporary binary population file.
-`runSlimSim()` executes forward simulations to specified generations using SLiM.
-`getSimFreqs2()` parses simulation output and calculates allele frequencies across replicates.
-
-** These functions are common for all the SLiM simulations for directional cross scenarios, with minor changes in `getSimFreqs2()` based to the scenarios and chromosomes simulated.
-
-## Output
-
-### `summary_s`
-The compilation of the selection response summaries for each scenario
-
-### `combined_plot`
-The combined plot depicting the distance-dependent responses for each scenario
-plots need to be generated for each scenario separately before combining
-
----
-
-# 3. Two-Chromosome SLiM Simulations: Directional Crosses
-
-## Scripts
-
-* `H0_Check2Chrom.R`
-* `H0_2Chrom.slim`
-
-## Overview
-
-This workflow extends the previous simulations to selected loci located on separate chromosomes, enabling analysis of interchromosomal interactions, additive vs. epistatic fitness effects and chromosome-specific selection dynamics. The required SLiM script is `H0_2Chrom.slim` defining the evolutionary model used during simulations.
-
-## Key Parameters
-
-| Parameter            | Description            |
-| -------------------- | ---------------------- |
-| `popSize`            | Population size                 |
-| `numReps`            | Number of replicate simulations |
-| `target1`, `target2` | Selected loci          |
-| `selCoefs`           | Selection coefficients          |
-| `epis`               | Epistasis coefficient  |
-| `domCoefs`           | Dominance coefficients |
-
-## Simulation Scenarios
-The script can be used to compare:
-
-* Additive fitness effects (`epis = 1.00`)
-  Alternatively, comment out the tick 2: late{} section in the SLiM script to run the additive scenario
-  
-* Epistatic fitness effects (`epis = 2.00`)
-
-
-## Output
-
-### `all_results`
-The tab-delimited file containing the simulation results
-
-### `p2a` & `p2e`
-Boxplots of selection strength (`s`) for additive vs. epistatic scenario comparisons
-
----
-
-# 4. Empirical Significance Threshold Estimation
-
-## Scripts
-
-* `threshold_for_ttest.R`
-* `Threshold.slim`
-
-## Overview
-
-This workflow estimates empirical significance thresholds for genome-wide t-tests using null simulations.
-
-The simulations generate null distributions of allele frequency change across multiple chromosomes to evaluate the expected false-positive distribution of the t-tests. This proportion of the false positives is then used as as significance cutoff for the t-tests on empirical data.
-
-The simulation uses the same window positions/marker positions as used in the allele frequency estimation to keep the number of windows consistent & test the multiple testing load due to the high number of windows.
-
-The repository also includes the supporting files required:
-* The marker `markers*.txt` files required for simulations and chromosome setup.
-*  Seed files for reproducible simulations (`threshold_seeds.txt`)
-
-
-
-## Population Setup
-
-| Population | Effective Population Size | Initial Frequency |
-| ---------- | ------------------------- | ----------------- |
-| `OS`       | 243                       | 0.67              |
-| `SO`       | 356                       | 0.33              |
-
-
-## Threshold Estimation
-The empirical significance cutoff is estimated as the 5th percentile of simulated p-values:
-```r
-quantile(all_results_df$p_value, 0.05)
-```
-Chromosome-specific cutoffs are also calculated separately.
-
-## Output
-
-### `p1`
-genome-wide p-value distributions
-
-### `cutoff_all`
-significance threshold estimate for combined p-values genome wide
-
-### `cutoff_chrom`
-Chromosome wise significance threshold estimates
-  
-### p2
-Histogram of all the p-values with the cutoff value `cutoff_all`
-
------
-# 5. SNP calling and window allele frequency estimation
+# 1. SNP calling and window allele frequency estimation
 
 ## Scripts
 
@@ -411,7 +209,7 @@ This generates 6 outputs. One for each sample:
 
 -----
 
-# 6. Testing for Deviations from Additive Assumption: 3x2 Crosses
+# 2. Testing for Deviations from Additive Assumption: 3x2 Crosses
 
 ## Scripts
 
@@ -536,7 +334,7 @@ Combined genome-wide deviation estimates across all three comparisons.
 
 -----
 
-# 7. Epistasis Simulations: 3x2 Crosses
+# 3. Epistasis Simulations: 3x2 Crosses
 
 ## Scripts
 
@@ -629,7 +427,7 @@ The output containing the following information:
 * `sign`: Predicted architecture; 0- Additive and 1- Non-additive (epistatic)
 
 -----
-# 8. Dominance Simulations: 3x2 Crosses
+# 4. Dominance Simulations: 3x2 Crosses
 
 ## Scripts
 
@@ -689,6 +487,209 @@ The output containing the following information:
 * `p_value`: Raw p-values from hypothesis testing
 * `sign`: Predicted architecture; 0- Additive and 1- Non-additive (Dominant)
 -----
+
+# 5. Allele Frequency and Selection Strength Analysis for Directional Crosses
+
+## Script
+
+`AFnS_plots.R`
+
+## Overview
+
+This script processes pooled sequencing allele frequency data from the directional crosses to:
+
+* Clean and restructure sample metadata
+* Calculate logit-transformed allele frequencies
+* Estimate selection response between generations (F1 → F10)
+* Perform genome-wide statistical comparisons between populations
+* Generate publication-quality figures
+
+## Required Input
+
+```r
+df <- readRDS("/Path/to/file/AlleleFreq.rds")
+```
+
+Required data fields include:
+
+* `chr` Chromosome
+* `pos` Positions (Mean position of the window)
+* `sample` The Cross direction - SO/OS
+* `Dmel_OregonR_non-inbred` Oregon allele frequency
+
+## Selection Strength Calculation
+
+```r
+s = (logit(F10) - logit(F1)) / 10
+```
+
+## Statistical Testing
+
+Genome-wide t-tests compare selection responses between populations (`Cross`) at each genomic position.
+
+Significance thresholds are determined using simulations from:
+
+```bash
+threshold_for_ttest.R
+```
+
+## Output Plots
+### `p1`
+Allele frequency trajectories across genomic positions.
+### `p2`
+Selection response (`s`) across chromosomes.
+### `p3`
+Genome-wide significance plot showing statistically significant loci.
+
+------
+
+# 6. Single-Chromosome SLiM Simulations: Directional Crosses
+
+## Scripts
+
+* `H0_Check.R`
+* `H0_Check.slim`
+
+## Overview
+
+These scripts perform forward-time SLiM simulations using SLiM to investigate how linkage distance, haplotype structure, and epistasis influence allele frequency change and selection response of two alleles associated with same chromsome (Specifically X) over time. The simulation configurations are controlled within the included SLiM script `H0_Check.slim`
+
+## Simulation Parameters
+
+| Parameter      | Description                     |
+| -------------- | ------------------------------- |
+| `popSize`      | Population size                 |
+| `numReps`      | Number of replicate simulations |
+| `target1`      | Reference selected locus        |
+| `distances_mb` | Distance between selected loci  |
+| `selCoefs`     | Selection coefficients          |
+| `epis`         | Epistasis coefficient           |
+| `domCoefs`     | Dominance coefficient           |
+
+## Simulation Scenarios
+
+The pipeline supports four evolutionary scenarios:
+
+| Scenario | Epistasis                        | Haplotype Structure  | Required Modifications in SLiM script |
+| -------- | -------------------------------- | -------------------- | --------------------------------------|
+| I        | Epistatic         | Same haplotype       | Comment out the chunk from line `111 to 116` and use the chunk from line `120 to 125` of the SLiM script, set (`epis = 2.00`) | 
+| II       | Neutral/Additive  | Same haplotype       | Comment out the chunk from line `111 to 116` and use the chunk from line `120 to 125` of the SLiM script, set (`epis = 1.00`) |
+| III      | Epistatic     | Different haplotypes | Comment out the chunk from line `120 to 125` and use the chunk from line `111 to 116` of the SLiM script, set  (`epis = 2.00`)     |
+| IV       | Neutral/Additive  | Different haplotypes | Comment out the chunk from line `120 to 125` and use the chunk from line `111 to 116` of the SLiM script, set (`epis = 1.00`) |
+
+* The script needs to be run 4 times, once for each scenario by making necessary changes to the SLiM and/or R-script
+  
+## Important functions 
+`initSlimSim()` creates an initial population state and writes a temporary binary population file.
+`runSlimSim()` executes forward simulations to specified generations using SLiM.
+`getSimFreqs2()` parses simulation output and calculates allele frequencies across replicates.
+
+** These functions are common for all the SLiM simulations for directional cross scenarios, with minor changes in `getSimFreqs2()` based to the scenarios and chromosomes simulated.
+
+## Output
+
+### `summary_s`
+The compilation of the selection response summaries for each scenario
+
+### `combined_plot`
+The combined plot depicting the distance-dependent responses for each scenario
+plots need to be generated for each scenario separately before combining
+
+---
+
+# 7. Two-Chromosome SLiM Simulations: Directional Crosses
+
+## Scripts
+
+* `H0_Check2Chrom.R`
+* `H0_2Chrom.slim`
+
+## Overview
+
+This workflow extends the previous simulations to selected loci located on separate chromosomes, enabling analysis of interchromosomal interactions, additive vs. epistatic fitness effects and chromosome-specific selection dynamics. The required SLiM script is `H0_2Chrom.slim` defining the evolutionary model used during simulations.
+
+## Key Parameters
+
+| Parameter            | Description            |
+| -------------------- | ---------------------- |
+| `popSize`            | Population size                 |
+| `numReps`            | Number of replicate simulations |
+| `target1`, `target2` | Selected loci          |
+| `selCoefs`           | Selection coefficients          |
+| `epis`               | Epistasis coefficient  |
+| `domCoefs`           | Dominance coefficients |
+
+## Simulation Scenarios
+The script can be used to compare:
+
+* Additive fitness effects (`epis = 1.00`)
+  Alternatively, comment out the tick 2: late{} section in the SLiM script to run the additive scenario
+  
+* Epistatic fitness effects (`epis = 2.00`)
+
+
+## Output
+
+### `all_results`
+The tab-delimited file containing the simulation results
+
+### `p2a` & `p2e`
+Boxplots of selection strength (`s`) for additive vs. epistatic scenario comparisons
+
+---
+
+# 8. Empirical Significance Threshold Estimation
+
+## Scripts
+
+* `threshold_for_ttest.R`
+* `Threshold.slim`
+
+## Overview
+
+This workflow estimates empirical significance thresholds for genome-wide t-tests using null simulations.
+
+The simulations generate null distributions of allele frequency change across multiple chromosomes to evaluate the expected false-positive distribution of the t-tests. This proportion of the false positives is then used as as significance cutoff for the t-tests on empirical data.
+
+The simulation uses the same window positions/marker positions as used in the allele frequency estimation to keep the number of windows consistent & test the multiple testing load due to the high number of windows.
+
+The repository also includes the supporting files required:
+* The marker `markers*.txt` files required for simulations and chromosome setup.
+*  Seed files for reproducible simulations (`threshold_seeds.txt`)
+
+
+
+## Population Setup
+
+| Population | Effective Population Size | Initial Frequency |
+| ---------- | ------------------------- | ----------------- |
+| `OS`       | 243                       | 0.67              |
+| `SO`       | 356                       | 0.33              |
+
+
+## Threshold Estimation
+The empirical significance cutoff is estimated as the 5th percentile of simulated p-values:
+```r
+quantile(all_results_df$p_value, 0.05)
+```
+Chromosome-specific cutoffs are also calculated separately.
+
+## Output
+
+### `p1`
+genome-wide p-value distributions
+
+### `cutoff_all`
+significance threshold estimate for combined p-values genome wide
+
+### `cutoff_chrom`
+Chromosome wise significance threshold estimates
+  
+### p2
+Histogram of all the p-values with the cutoff value `cutoff_all`
+
+-----
+
 
 # General Notes
 
