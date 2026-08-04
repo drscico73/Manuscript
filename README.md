@@ -209,9 +209,9 @@ This generates 6 outputs. One for each sample:
 
 ## Directional Crosses
 
-The variant calling and filtering for the samples is carried out similar to that of the 3x2 crosses (as mentioned above). Once the pileup VCF files for the samples are generated a marker SNP VCF is created. For this, the marker SNP files `ore_marker_file.txt` and `sam_marker_file.txt` are combined and used as a regions file. The window wise allele frequency estimates are then calculated using the Rscript `haplofreq.R`
+The variant calling and filtering for the SO & OS samples is carried out similar to that of the _3x2 crosses_ (as mentioned above). Once the pileup VCF files for the samples are generated a marker SNP VCF is created. For this, the marker SNP files `ore_marker_file.txt` and `sam_marker_file.txt` are combined and used as a regions file. The window wise allele frequency estimates are then calculated for non-overlapping 500 SNP windows (`-w 500 -s 500`) using the Rscript `haplofreq.R`
 
-`haploFreq.R -i <samples.vcf> -m <markers.vcf> -o <out.rds> -s 500 -w 500 -d 1,2`
+`haploFreq.R -i <samples.vcf> -m <markers.vcf> -o <out.rds> -w 500 -s 500 -d 1,2`
 
 -----
 
