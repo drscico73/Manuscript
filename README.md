@@ -91,7 +91,9 @@ fuzzyjoin
   * `sed`
   * `cut`
   * `grep`
-* `bcftools`
+  * `bcftools`
+  * `awk`
+    
 * Softwares mentioned in [SNP calling pipline](https://zenodo.org/records/21506978).
 
 ---
