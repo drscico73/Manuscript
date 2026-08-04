@@ -21,6 +21,8 @@ The workflows include:
 | `H0_Check.R`                | Single-chromosome SLiM simulations for directional crosses               |
 | `H0_Check2Chrom.R`          | Two-chromosome SLiM simulations for directional crosses                  |
 | `threshold_for_ttest.R`     | Empirical significance threshold estimation                              |
+| `process_mark.R` | Generate marker SNP catalogue for each inbred line |
+| `cont_nt`| Makes the windows continuous |
 | `func_ee_analysis.R`       | Functions for analysis of experimental evolution data for 3x2 crosses              |
 | `func_slim_analysis.R`      | Functions for analysis of SLiM simulations for 3x2 crosses               |
 | `func_visual_ee_data.R`    | Functions for visualization of experimental evolution data for 3x2 crosses         |
@@ -36,6 +38,8 @@ The workflows include:
 | `Threshold.slim`            | SLiM model for null simulations                                          |
 | `one_chr.slim`              | SLiM model for one-chromosome simulations for 3x2 crosses                |
 | `two_chr.slim`              | SLiM model for two-chromosome simulations for 3x2 crosses                |
+| `filtering_marker_snps.sh` | Filters the input data for marker positions |
+| `merging_sample_markers.sh` |Generates merged sample and inbred line VCF files from cram files|
 | `threshold_seeds.txt`       | Seeds for reproducible threshold simulations                             |
 | `markers*.txt`              | Marker/window positions used in simulations                              |
 | `ore_marker_file.txt`       | Marker SNPs for OregonR                                                  |
