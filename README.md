@@ -348,7 +348,7 @@ The merged file is then filtered according to the following parameters using bcf
 1. TYPE=\"snp\": Ensuring that we only have SNPs
 2. -T norepeats.bed: Removing repeat regions
 3. -g 5: Removing SNPs within 5 bp of INDELs
-4. NFO/DP > $((avg_depth / 2)) & INFO/DP < $((avg_depth * 2)): Removing positions with coverage depth more than 2 * average_depth or less than 1/2 * average_depth
+4. NFO/DP > ((avg_depth / 2)) & INFO/DP < ((avg_depth * 2)): Removing positions with coverage depth more than 2 * average_depth or less than 1/2 * average_depth
 
 The filtered VCF file is then normalised.
 
