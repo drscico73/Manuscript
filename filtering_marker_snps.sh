@@ -91,7 +91,7 @@ bcftools view -s ^Dmel_Helsinki_inbred_F11 -Oz -o "$samples_dir/sam_so_markers.v
 bcftools view -s ^Dmel_Helsinki_inbred_F11 -Oz -o "$samples_dir/ore_so_markers.vcf.gz" "$filtered_dir/ore_marker_flt.vcf.gz"
 bcftools view -s ^Dmel_Samarkand_inbred -Oz -o "$samples_dir/ore_ho_markers.vcf.gz" "$filtered_dir/ore_marker_flt.vcf.gz"
 
-###done
+###done generating raw data
 
 echo "Processing completed"
 
