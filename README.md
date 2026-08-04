@@ -318,12 +318,96 @@ Histogram of all the p-values with the cutoff value `cutoff_all`
 
 ## Overview
 
+These scripts process mapped pooled sequencing results to compute window allele frequency for marker SNPs. Marker SNPs were defined as SNPs that had a private allele for one parental line (either OregonR, Samarkand, or Helsinki) while the other lines shared the same alternate allele.
+
+These scripts:
+
+1. Call variants using bcftools pileup for all CRAM files
+2. Merge all the input BCFs.
+3. Filter the merged BCF to keep only high-confidence SNPs in non-repeat regions and delete boundary SNPs around INDELs
+4. Make a merged inbred line file
+5. Make a catalogue of marker SNPs for each inbred line
+6. Filter the merged sample and inbred line files for marker SNPs
+7. Compute window coordinates to be used for estimating window allele frequencies
+8. Compute window allele frequencies
+
 ## Required Inputs
 
 * Aligned sequence data for sample and inbred lines as CRAM files
 * _Drosophila melanogaster_ reference genome (dmel6.03)
 * norepeats.bed containing non-repeat regions
 
+## Variant calling, Merging and Filtering
+
+Variant calling is done using __*pileup.sh*__ using `bcftools pileup`. It also needs helper scripts __*info2fmt.awk*__, __*reampq.awk*__, and __*flag-short.awk*__. 
+
+Variant calling is done for all the CRAM files present in the input folder. The resultant BCFs are stored in BCF directory. All the BCF files are then merged using `bcftools merge`, and __*post-merging.awk*__ is used to perform post-merging processing. This adds additional information to the merged samples, including FORMAT/AF (observed allele frequencies), FORMAT/XF (expected allele frequencies, and FORMAT/SAD (sum of allelic depths), along with INFO/NUMALT. post-merging.awk also converts an alternate allele (one of all alternate alleles at multiallelic sites) to the reference if the reference allele is absent from all samples. 
+For more details, go to: [SNP calling pipline](https://zenodo.org/records/21506978).
+
+The merged file is then filtered according to the following parameters using bcftools filter:
+1. TYPE=\"snp\": Ensuring that we only have SNPs
+2. -T norepeats.bed: Removing repeat regions
+3. -g 5: Removing SNPs within 5 bp of INDELs
+4. NFO/DP > $((avg_depth / 2)) & INFO/DP < $((avg_depth * 2)): Removing positions with coverage depth more than 2 * average_depth or less than 1/2 * average_depth
+
+The filtered VCF file is then normalised.
+
+The normalised file is then used to generate marker_flt.vcf.gz, which has only the inbred lines.
+
+This script generates two outputs: 
+1. mpileup_flt.vcf.gz: Merged sample and inbred lines VCF file filtered and normalised. 
+2. marker_flt.vcfgz: Merged inbred lines VCF file filtered and normalised
+
+## Identifying marker SNPs
+
+Marker SNPs are identified using process_mark.R. It needs marker.vcf.gz as the input and will produce a .txt file with the position and allelic configuration of the marker SNPs. One marker SNP catalogue for each line is generated. Marker SNPs are defined as SNPs that are fixed for reference {0} or alternate {1} in one line and are fixed for the other allele in the other two lines. 
+
+The three outputs are: 
+1. ore_marker_file.txt
+2. sam_marker_file.txt
+3. hel_marker_file.txt
+
+## Filtering for marker SNPs and samples
+
+The outputs from merging_sample_markers.sh are filtered for marker SNPs, and sample-specific VCF files are generated. The VCF files are annotated with an additional field that acts as a key to match the records from our marker catalogues. This is done using `bcftools annotate`. Filtering is by matching the position and the SNP identity using `bcftools view`. The VCF files are filtered for markers of each inbred line, thus generating 6 VCF files.
+
+The filtered VCF files are then filtered again for samples and corresponding inbred lines to make sample-specific merged marker and pileup files.  The resultant outputs are then used as inputs for calculating window allele frequencies.
+
+The outputs are:
+
+1. hel_ho_mpileup.vcf.gz: Merged sample and inbred line BCFs for sample HO-OH having marker SNPs of Helsinki.
+2. hel_hs_mpileup.vcf.gz: Merged sample and inbred line BCFs for sample HS-SH having markers SNPs of Helsinki.
+3. sam_hs_mpileup.vcf.gz: Merged sample and inbred line BCFs for sample HS-SH having markers SNPs of Samarkand.
+4. sam_so_mpileup.vcf.gz: Merged sample and inbred line BCFs for sample SO-OS having markers SNPs of Samarkand.
+5. ore_so_mpileup.vcf.gz: Merged sample and inbred line BCFs for sample SO-OS having markers SNPs of OregonR.
+6. ore_ho_mpileup.vcf.gz: Merged sample and inbred line BCFs for sample HO-OH having markers SNPs of OregonR.
+   
+
+1. hel_ho_markers.vcf.gz: Merged inbred line BCFs for sample HO-OH having marker SNPs of Helsinki.
+2. hel_hs_markers.vcf.gz: Merged inbred line BCFs for sample HS-SH having markers SNPs of Helsinki.
+3. sam_hs_markers.vcf.gz: Merged inbred line BCFs for sample HS-SH having markers SNPs of Samarkand.
+4. sam_so_markers.vcf.gz: Merged inbred line BCFs for sample SO-OS having markers SNPs of Samarkand.
+5. ore_so_markers.vcf.gz: Merged inbred line BCFs for sample SO-OS having markers SNPs of OregonR.
+6. ore_ho_markers.vcf.gz: Merged inbred line BCFs for sample HO-OH having markers SNPs of OregonR.
+
+## Computing coordinates for windows
+
+OregonR had the least number of markers. The window coordinates were thus computed using it. To compute the windows in which approximately 500 OregonR marker SNPs were present haploFreq.R ran: `haploFreq.R -i ore_so_mpileup.vcf.gz -m ore_so_markers.vcf.gz -o out_500.rds`.
+
+The windows were made continuous using cont_nt_pos.R, and the output window_details.rds was used for subsequent analysis.
+
+## Window allele frequency estimation
+
+This is done using predef_win_haploFreq.R. The syntax is as follows: `predef_win_haploFreq.R -i <samples.vcf> -m <markers.vcf> -o <out.rds> -p <pre_win.rds>`
+
+This generates 6 outputs. One for each sample:
+
+1. hel_ho_out_500.rds
+2. ore_ho_out_500.rds
+3. hel_hs_out_500.rds
+4. sam_hs_out_500.rds
+5. ore_so_out_500.rds
+6. sam_so_out_500.rds
 
 -----
 
@@ -331,9 +415,9 @@ Histogram of all the p-values with the cutoff value `cutoff_all`
 
 ## Scripts
 
-* `main_script_ee_data.R`: Main script for analysis of experimental evolution data
-* `func_ee_analysis.R`: Functions for analysis of experimental evolution data
-* `func_visual_ee_data.R`: Functions for visualization of experimental evolution data
+* `main_script_ee_data.R`
+* `func_ee_analysis.R
+* `func_visual_ee_data.R`
 
 ## Overview
 
