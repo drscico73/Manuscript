@@ -57,6 +57,8 @@ The workflows include:
 data.table
 dplyr
 tidyr
+tidyverse
+vcfR
 ggplot2
 ggpubr
 scales
@@ -89,6 +91,8 @@ fuzzyjoin
   * `sed`
   * `cut`
   * `grep`
+* `bcftools`
+* Softwares mentioned in [SNP calling pipline](https://zenodo.org/records/21506978).
 
 ---
 
