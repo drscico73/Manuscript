@@ -298,11 +298,36 @@ Chromosome wise significance threshold estimates
 ### p2
 Histogram of all the p-values with the cutoff value `cutoff_all`
 
+-----
+# 5. SNP calling and window allele frequency estimation
+
+## Scripts
+
+* `merging_sample_markers.sh`
+* `process_mark.R`
+* `filtering_marker_snps.R`
+* `haploFreq.R`
+* `cont_nt_pos.R`
+* `predef_win_haploFreq.R`
+* flag-short.awk
+* info2fmt.awk
+* post-merging.awk
+* remapq.awk
+
+*__NOTE: flag-short.awk, info2fmt.awk, post-merging.awk and remapq.awk are available at__* [SNP calling pipline](https://zenodo.org/records/21506978).
+
+## Overview
+
+## Required Inputs
+
+* Aligned sequence data for sample and inbred lines as CRAM files
+* _Drosophila melanogaster_ reference genome (dmel6.03)
+* norepeats.bed containing non-repeat regions
 
 
 -----
 
-# 5. Testing for Deviations from Additive Assumption: 3x2 Crosses
+# 6. Testing for Deviations from Additive Assumption: 3x2 Crosses
 
 ## Scripts
 
@@ -427,7 +452,7 @@ Combined genome-wide deviation estimates across all three comparisons.
 
 -----
 
-# 6. Epistasis Simulations: 3x2 Crosses
+# 7. Epistasis Simulations: 3x2 Crosses
 
 ## Scripts
 
@@ -520,7 +545,7 @@ The output containing the following information:
 * `sign`: Predicted architecture; 0- Additive and 1- Non-additive (epistatic)
 
 -----
-# 7. Dominance Simulations: 3x2 Crosses
+# 8. Dominance Simulations: 3x2 Crosses
 
 ## Scripts
 
@@ -542,7 +567,7 @@ where *z_A* and *z_B* represent the selection response of the marker allele from
 
 ## Simulation Parameters
 
-Described in **6. Epistasis Simulations: 3x2 crosses**
+Described in **7. Epistasis Simulations: 3x2 crosses**
 
 ## Simulation Scenarios
 
