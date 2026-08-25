@@ -135,6 +135,10 @@ These scripts:
 * _Drosophila melanogaster_ reference genome (dmel6.03)
 * norepeats.bed containing non-repeat regions
 
+## Order of the scripts/Workflow
+
+CRAM files --> merging_sample_markers.sh --> process_mark.R --> filtering_marker_snps.sh --> haplofreq.R --> cont_nt_pos.R --> predef_win_haploFreq.R --> Downstream analysis
+
 ## Variant calling, Merging and Filtering
 
 Variant calling is done using __*pileup.sh*__ using `bcftools pileup`. It also needs helper scripts __*info2fmt.awk*__, __*reampq.awk*__, and __*flag-short.awk*__. 
