@@ -22,7 +22,7 @@ The workflows include:
 | `H0_Check2Chrom.R`          | Two-chromosome SLiM simulations for directional crosses                  |
 | `threshold_for_ttest.R`     | Empirical significance threshold estimation                              |
 | `process_mark.R` | Generate marker SNP catalogue for each inbred line |
-| `cont_nt`| Makes the windows continuous |
+| `cont_nt_pos.R`| Makes the windows continuous |
 | `func_ee_analysis.R`       | Functions for analysis of experimental evolution data for 3x2 crosses              |
 | `func_slim_analysis.R`      | Functions for analysis of SLiM simulations for 3x2 crosses               |
 | `func_visual_ee_data.R`    | Functions for visualization of experimental evolution data for 3x2 crosses         |
