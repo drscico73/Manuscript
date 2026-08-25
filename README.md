@@ -103,7 +103,7 @@ fuzzyjoin
 
 * `merging_sample_markers.sh`
 * `process_mark.R`
-* `filtering_marker_snps.R`
+* `filtering_marker_snps.sh`
 * `haploFreq.R`
 * `cont_nt_pos.R`
 * `predef_win_haploFreq.R`
