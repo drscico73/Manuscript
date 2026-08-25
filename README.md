@@ -220,7 +220,7 @@ The variant calling and filtering for the SO & OS samples is carried out similar
 ## Scripts
 
 * `main_script_ee_data.R`
-* `func_ee_analysis.R
+* `func_ee_analysis.R`
 * `func_visual_ee_data.R`
 
 ## Overview
