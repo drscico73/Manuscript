@@ -515,6 +515,7 @@ This script processes pooled sequencing allele frequency data from the direction
 ```r
 df <- readRDS("/Path/to/file/AlleleFreq.rds")
 ```
+Use the `DirCrossAF.rds` file in the `Supporting_Files` folder to regenerate the results in manuscript. You can also create your own _.rds_ file from the raw sequencing data following the SNP calling pipeline in Section 1, followed by the R script, `haploFreq.R` which generates allele frequency data from filtered _.bcf_ files.
 
 Required data fields include:
 
