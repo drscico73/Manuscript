@@ -4,12 +4,12 @@ This repository contains R and SLiM scripts used to analyze allele frequency dyn
 
 The workflows include:
 
-* Allele frequency estimation and visualization
-* Selection response estimation
-* Genome-wide statistical testing
-* Forward-time SLiM simulations
-* Empirical threshold estimation for genome-wide t-tests
-* Testing for deviations from additive assumption
+* Allele frequency estimation and visualization.
+* Selection response estimation.
+* Genome-wide statistical testing.
+* Forward-time SLiM simulations.
+* Empirical threshold estimation for genome-wide t-tests.
+* Testing for deviations from additive assumption.
 
 ---
 
@@ -120,14 +120,14 @@ These scripts process mapped pooled sequencing results to compute window allele 
 
 These scripts:
 
-1. Call variants using bcftools pileup for all CRAM files
+1. Call variants using bcftools pileup for all CRAM files.
 2. Merge all the input BCFs.
-3. Filter the merged BCF to keep only high-confidence SNPs in non-repeat regions and delete boundary SNPs around INDELs
-4. Make a merged inbred line file
-5. Make a catalogue of marker SNPs for each inbred line
-6. Filter the merged sample and inbred line files for marker SNPs
-7. Compute window coordinates to be used for estimating window allele frequencies
-8. Compute window allele frequencies
+3. Filter the merged BCF to keep only high-confidence SNPs in non-repeat regions and delete boundary SNPs around INDELs.
+4. Make a merged inbred line file.
+5. Make a catalogue of marker SNPs for each inbred line.
+6. Filter the merged sample and inbred line files for marker SNPs.
+7. Compute window coordinates to be used for estimating window allele frequencies.
+8. Compute window allele frequencies.
 
 ## Required Inputs
 
@@ -141,28 +141,28 @@ CRAM files --> merging_sample_markers.sh --> process_mark.R --> filtering_marker
 
 ## Variant calling, Merging and Filtering
 
-Variant calling is done using __*pileup.sh*__ using `bcftools pileup`. It also needs helper scripts __*info2fmt.awk*__, __*reampq.awk*__, and __*flag-short.awk*__. 
+The first step in the pipeline is to call SNPs and merge all the SNP data using **merging_sample_markers.sh**. The script calls __*pileup.sh*__, which does variant calling with `bcftools pileup`. __*pileup.sh*__ also needs helper scripts __*info2fmt.awk*__, __*reampq.awk*__, and __*flag-short.awk*__. 
 
-Variant calling is done for all the CRAM files present in the input folder. The resultant BCFs are stored in BCF directory. All the BCF files are then merged using `bcftools merge`, and __*post-merging.awk*__ is used to perform post-merging processing. This adds additional information to the merged samples, including FORMAT/AF (observed allele frequencies), FORMAT/XF (expected allele frequencies, and FORMAT/SAD (sum of allelic depths), along with INFO/NUMALT. post-merging.awk also converts an alternate allele (one of all alternate alleles at multiallelic sites) to the reference if the reference allele is absent from all samples. 
-For more details, go to: [SNP calling pipline](https://zenodo.org/records/21506978).
+Variant calling is done for all the CRAM files present in the input folder. The resultant BCFs are stored in the BCF directory. All the BCF files are then merged using `bcftools merge`, and the script calls __*post-merging.awk*__ to perform post-merging processing. This adds additional information to the merged samples, including FORMAT/AF (observed allele frequencies), FORMAT/XF (expected allele frequencies, and FORMAT/SAD (sum of allelic depths), along with INFO/NUMALT. post-merging.awk also converts an alternate allele (one of all alternate alleles at multiallelic sites) to the reference if the reference allele is absent from all samples. 
+For more details, go to: [SNP calling pipeline](https://zenodo.org/records/21506978).
 
 The merged file is then filtered according to the following parameters using bcftools filter:
-1. TYPE=\"snp\": Ensuring that we only have SNPs
-2. -T norepeats.bed: Removing repeat regions
-3. -g 5: Removing SNPs within 5 bp of INDELs
-4. INFO/DP > ((avg_depth / 2)) & INFO/DP < ((avg_depth * 2)): Removing positions with coverage depth more than 2 * average_depth or less than 1/2 * average_depth
+1. TYPE=\"snp\": Ensuring that we only have SNPs.
+2. -T norepeats.bed: Removing repeat regions.
+3. -g 5: Removing SNPs within 5 bp of INDELs.
+4. INFO/DP > ((avg_depth / 2)) & INFO/DP < ((avg_depth * 2)): Removing positions with coverage depth more than 2 * average_depth or less than 1/2 * average_depth.
 
-The filtered VCF file is then normalised.
+The filtered VCF file is then normalized.
 
-The normalised file is then used to generate marker_flt.vcf.gz, which has only the inbred lines.
+The normalized file is then used to generate marker_flt.vcf.gz, which has only the inbred lines.
 
 This script generates two outputs: 
-1. mpileup_flt.vcf.gz: Merged sample and inbred lines VCF file filtered and normalised. 
-2. marker_flt.vcfgz: Merged inbred lines VCF file filtered and normalised
+1. mpileup_flt.vcf.gz: Merged sample and inbred lines VCF file, filtered and normalized. 
+2. marker_flt.vcf.gz: Merged inbred lines VCF file, filtered and normalized.
 
 ## Identifying marker SNPs
 
-Marker SNPs are identified using process_mark.R. It needs marker.vcf.gz as the input and will produce a .txt file with the position and allelic configuration of the marker SNPs. One marker SNP catalogue for each line is generated. Marker SNPs are defined as SNPs that are fixed for reference {0} or alternate {1} in one line and are fixed for the other allele in the other two lines. 
+Marker SNPs are identified using **process_mark.R**. It needs _marker.vcf.gz_ as the input and will produce a TXT file with the position and allelic configuration of the marker SNPs. One marker SNP catalogue for each line is generated. Marker SNPs are defined as SNPs that are fixed for the reference {0} or alternate {1} in one line and are fixed for the other allele in the other two lines. 
 
 The three outputs are: 
 1. ore_marker_file.txt
@@ -171,12 +171,12 @@ The three outputs are:
 
 ## Filtering for marker SNPs and samples
 
-The outputs from merging_sample_markers.sh are filtered for marker SNPs, and sample-specific VCF files are generated. The VCF files are annotated with an additional field that acts as a key to match the records from our marker catalogues. This is done using `bcftools annotate`. Filtering is by matching the position and the SNP identity using `bcftools view`. The VCF files are filtered for markers of each inbred line, thus generating 6 VCF files.
+The outputs from merging_sample_markers.sh are filtered for marker SNPs, and sample-specific VCF files are generated using **filtering_marker_snps.sh**. The VCF files are annotated with an additional field that acts as a key to match the records from our marker catalogues. This is done using `bcftools annotate`. Filtering is done by matching the position and the SNP identity using `bcftools view`. The VCF files are filtered for markers of each inbred line, thus generating 6 VCF files.
 
 The filtered VCF files are then filtered again for samples and corresponding inbred lines to make sample-specific merged marker and pileup files.  The resultant outputs are then used as inputs for calculating window allele frequencies.
 
 The outputs are:
-
+**_6 sample files_**
 1. hel_ho_mpileup.vcf.gz: Merged sample and inbred line BCFs for sample HO-OH having marker SNPs of Helsinki.
 2. hel_hs_mpileup.vcf.gz: Merged sample and inbred line BCFs for sample HS-SH having markers SNPs of Helsinki.
 3. sam_hs_mpileup.vcf.gz: Merged sample and inbred line BCFs for sample HS-SH having markers SNPs of Samarkand.
@@ -184,7 +184,7 @@ The outputs are:
 5. ore_so_mpileup.vcf.gz: Merged sample and inbred line BCFs for sample SO-OS having markers SNPs of OregonR.
 6. ore_ho_mpileup.vcf.gz: Merged sample and inbred line BCFs for sample HO-OH having markers SNPs of OregonR.
    
-
+**_6 marker files_**
 1. hel_ho_markers.vcf.gz: Merged inbred line BCFs for sample HO-OH having marker SNPs of Helsinki.
 2. hel_hs_markers.vcf.gz: Merged inbred line BCFs for sample HS-SH having markers SNPs of Helsinki.
 3. sam_hs_markers.vcf.gz: Merged inbred line BCFs for sample HS-SH having markers SNPs of Samarkand.
@@ -194,13 +194,13 @@ The outputs are:
 
 ## Computing coordinates for windows
 
-OregonR had the least number of markers. The window coordinates were thus computed using it. To compute the windows in which approximately 500 OregonR marker SNPs were present haploFreq.R ran: `haploFreq.R -i ore_so_mpileup.vcf.gz -m ore_so_markers.vcf.gz -o out_500.rds`.
+OregonR had the least number of markers; to ensure that it had enough SNPs in each window, we computed window ranges using its SNP data. To compute the windows in which approximately 500 OregonR marker SNPs were present, **haploFreq.R** was used: `haploFreq.R -i ore_so_mpileup.vcf.gz -m ore_so_markers.vcf.gz -o out_500.rds`.
 
-The windows were made continuous using cont_nt_pos.R, and the output window_details.rds was used for subsequent analysis.
+The windows were made continuous using **cont_nt_pos.R**, and the output window_details.rds was used for subsequent analysis.
 
 ## Window allele frequency estimation
 
-This is done using predef_win_haploFreq.R. The syntax is as follows: `predef_win_haploFreq.R -i <samples.vcf> -m <markers.vcf> -o <out.rds> -p <pre_win.rds>`
+This is done using **predef_win_haploFreq.R**. The syntax is as follows: `predef_win_haploFreq.R -i <samples.vcf> -m <markers.vcf> -o <out.rds> -p <pre_win.rds>`
 
 This generates 6 outputs. One for each sample:
 
@@ -213,7 +213,7 @@ This generates 6 outputs. One for each sample:
 
 ## Directional Crosses
 
-The variant calling and filtering for the SO & OS samples is carried out similar to that of the _3x2 crosses_ (as mentioned above). Once the pileup VCF files for the samples are generated a marker SNP VCF is created. For this, the marker SNP files `ore_marker_file.txt` and `sam_marker_file.txt` are combined and used as a regions file. The window wise allele frequency estimates are then calculated for non-overlapping 500 SNP windows (`-w 500 -s 500`) using the Rscript `haplofreq.R`
+The variant calling and filtering for the SO & OS samples is carried out similarly to that of the _3x2 crosses (as mentioned above). Once the pileup VCF files for the samples are generated, a marker SNP VCF is created. For this, the marker SNP files `ore_marker_file.txt` and `sam_marker_file.txt` are combined and used as a regions file. The window-wise allele frequency estimates are then calculated for non-overlapping 500 SNP windows (`-w 500 -s 500`) using the R script `haplofreq.R`
 
 `haploFreq.R -i <samples.vcf> -m <markers.vcf> -o <out.rds> -w 500 -s 500 -d 1,2`
 
@@ -231,14 +231,14 @@ The variant calling and filtering for the SO & OS samples is carried out similar
 
 These scripts process pooled sequencing allele frequency data from 3x2 crosses to:
 
-* Clean and restructure sample metadata
-* Average allele-frequency estimates obtained from two independent marker sets
-* Calculate logit-transformed allele frequencies as a measure of selection response
-* Estimate deviations from additive expectations
-* Perform genome-wide statistical test for deviations from additivity
-* Correct for multiple testing using Benjamini-Hochberg procedure
-* Classify genomic regions according to number of significant deviations
-* Generate publication-quality figures
+* Clean and restructure sample metadata.
+* Average allele-frequency estimates obtained from two independent marker sets.
+* Calculate logit-transformed allele frequencies as a measure of selection response.
+* Estimate deviations from additive expectations.
+* Perform genome-wide statistical test for deviations from additivity.
+* Correct for multiple testing using the Benjamini-Hochberg procedure.
+* Classify genomic regions according to number of significant deviations.
+* Generate publication-quality figures.
 
 ## Required Inputs
 
@@ -264,10 +264,10 @@ Required data fields include:
 
 `process_data()`:
 
-* Removes reference samples
-* Parses sample, generation, and replicate information
-* Standardizes sample and allele-frequency column names
-* Calculates the midpoint `mpos` of each genomic window
+* Removes reference samples.
+* Parses sample, generation, and replicate information.
+* Standardizes sample and allele-frequency column names.
+* Calculates the midpoint `mpos` of each genomic window.
 
 For each pairwise comparison, allele frequencies estimated from two independent marker sets are averaged.
 
@@ -283,10 +283,10 @@ where AF_A is the window allele frequency for line A
 
 `compute_p()`:
 
-* Tests three additive expectations
-* Correct for multiple testing
-* Classify windows as significantly deviating (1) or not significantly deviating (0) from additive expectations
-* Calculates deviation from additive expectations
+* Tests three additive expectations.
+* Correct for multiple testing.
+* Classify windows as significantly deviating (1) or not significantly deviating (0) from additive expectations.
+* Calculates deviation from additive expectations.
 
 Genome-wide statistical tests are performed independently for each genomic window using linear models: 
 
@@ -358,8 +358,8 @@ Combined genome-wide deviation estimates across all three comparisons.
 ## Overview
 
 These scripts perform forward-time SLiM simulations to investigate how genomic distance affects the contribution of epistasis to the response to selection. It tests this in two cases:
-1. When two interacting targets are located on the same chromosome but on different haplotypes. The simulation model is described in ***one_chr.slim***. The analysis is done using ***main_script_slim_one_chr.R***
-2. When two interacting targets are located on two different chromosomes. The simulation model is described in ***two_chr.slim***. The analysis is done using ***main_script_slim_two_chr.R***
+1. When two interacting targets are located on the same chromosome but on different haplotypes. The simulation model is described in ***one_chr.slim***. The analysis is done using ***main_script_slim_one_chr.R***.
+2. When two interacting targets are located on two different chromosomes. The simulation model is described in ***two_chr.slim***. The analysis is done using ***main_script_slim_two_chr.R***.
 
 The pipeline tests the relationship:
 
@@ -367,7 +367,7 @@ The pipeline tests the relationship:
 
 where *z_A* and *z_B* represent the selection response of the marker allele from lines A and B, respectively. *AB*, *AC*, and *BC* represent crosses between lines A and B, lines A and C, and lines B and C, respectively. 
 
-To investigate the effect of genomic distance, the genomic position of target A is kept constant, while the position of target B is systematically varied across 400 different genomic positions. For each position of target B, the simulation is run and the relationship above is tested to assess how the genomic distance between the two interacting targets affects the ability to detect the epistatic contribution to the response to selection.
+To investigate the effect of genomic distance, the genomic position of target A is kept constant, while the position of target B is systematically varied across 400 different genomic positions. For each position of target B, the simulation is run, and the relationship above is tested to assess how the genomic distance between the two interacting targets affects the ability to detect the epistatic contribution to the response to selection.
 
 
 ## Simulation Parameters
@@ -418,7 +418,7 @@ The effect of the distance between the selection targets (or markers; X-axis) on
 
 ### `roc_curve`
 
-The receiver-operating curve.
+The receiver operating characteristic curve.
 
 ## Output Data
 
@@ -508,11 +508,11 @@ The output containing the following information:
 
 This script processes pooled sequencing allele frequency data from the directional crosses to:
 
-* Clean and restructure sample metadata
-* Calculate logit-transformed allele frequencies
-* Estimate selection response between generations (F1 → F10)
-* Perform genome-wide statistical comparisons between populations
-* Generate publication-quality figures
+* Clean and restructure sample metadata.
+* Calculate logit-transformed allele frequencies.
+* Estimate selection response between generations (F1 → F10).
+* Perform genome-wide statistical comparisons between populations.
+* Generate publication-quality figures.
 
 ## Required Input
 
@@ -600,11 +600,11 @@ The pipeline supports four evolutionary scenarios:
 ## Output
 
 ### `summary_s`
-The compilation of the selection response summaries for each scenario
+The compilation of the selection response summaries for each scenario.
 
 ### `combined_plot`
-The combined plot depicting the distance-dependent responses for each scenario
-plots need to be generated for each scenario separately before combining
+The combined plot depicting the distance-dependent responses for each scenario.
+plots need to be generated for each scenario separately before combining.
 
 ---
 
@@ -634,7 +634,7 @@ This workflow extends the previous simulations to selected loci located on separ
 The script can be used to compare:
 
 * Additive fitness effects (`epis = 1.00`)
-  Alternatively, comment out the tick 2: late{} section in the SLiM script to run the additive scenario
+  Alternatively, comment out the tick 2: late{} section in the SLiM script to run the additive scenario.
   
 * Epistatic fitness effects (`epis = 2.00`)
 
@@ -660,7 +660,7 @@ Boxplots of selection strength (`s`) for additive vs. epistatic scenario compari
 
 This workflow estimates empirical significance thresholds for genome-wide t-tests using null simulations.
 
-The simulations generate null distributions of allele frequency change across multiple chromosomes to evaluate the expected false-positive distribution of the t-tests. This proportion of the false positives is then used as as significance cutoff for the t-tests on empirical data.
+The simulations generate null distributions of allele frequency change across multiple chromosomes to evaluate the expected false-positive distribution of the t-tests. This proportion of false positives is then used as the significance cutoff for the t-tests on empirical data.
 
 The simulation uses the same window positions/marker positions as used in the allele frequency estimation to keep the number of windows consistent & test the multiple testing load due to the high number of windows.
 
